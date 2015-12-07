@@ -406,49 +406,29 @@ func makePackage(str string) {
 	str = strings.Replace(str, "go", "goo", -1)
 	str = strings.Replace(str, "if", "iff", -1)
 
-	var wire string
-	var inputs []string
-	var op string
-
-	var a, b, c string
-	switch {
-	case strings.Contains(str, "NOT"):
-		fmt.Sscanf(str, "NOT %s -> %s", &a, &b)
-		wire = b
-		inputs = []string{a}
-		op = "^"
-	case strings.Contains(str, "AND"):
-		fmt.Sscanf(str, "%s AND %s -> %s", &a, &b, &c)
-		wire = c
-		inputs = []string{a, b}
-		op = "&"
-	case strings.Contains(str, "OR"):
-		fmt.Sscanf(str, "%s OR %s -> %s", &a, &b, &c)
-		wire = c
-		inputs = []string{a, b}
-		op = "|"
-	case strings.Contains(str, "LSHIFT"):
-		fmt.Sscanf(str, "%s LSHIFT %s -> %s", &a, &b, &c)
-		wire = c
-		inputs = []string{a, b}
-		op = "<<"
-	case strings.Contains(str, "RSHIFT"):
-		fmt.Sscanf(str, "%s RSHIFT %s -> %s", &a, &b, &c)
-		wire = c
-		inputs = []string{a, b}
-		op = ">>"
-	default:
-		fmt.Sscanf(str, "%s -> %s", &a, &b)
-		wire = b
-		inputs = []string{a}
-		op = ""
-	}
+	wire := str[strings.LastIndex(str, "->")+3:]
 
 	var contents string
-	if len(inputs) == 1 {
-		contents = makeUnaryContents(wire, inputs[0], op)
-	} else {
-		contents = makeBinaryContents(wire, inputs[0], inputs[1], op)
+	var out, in1, in2 string
+	switch {
+	case strings.Contains(str, "NOT"):
+		fmt.Sscanf(str, "NOT %s -> %s", &in1, &out)
+		contents = makeUnaryContents(out, in1, "^")
+	case strings.Contains(str, "AND"):
+		fmt.Sscanf(str, "%s AND %s -> %s", &in1, &in2, &out)
+		contents = makeBinaryContents(out, in1, in2, "&")
+	case strings.Contains(str, "OR"):
+		fmt.Sscanf(str, "%s OR %s -> %s", &in1, &in2, &out)
+		contents = makeBinaryContents(out, in1, in2, "|")
+	case strings.Contains(str, "LSHIFT"):
+		fmt.Sscanf(str, "%s LSHIFT %s -> %s", &in1, &in2, &out)
+		contents = makeBinaryContents(out, in1, in2, "<<")
+	case strings.Contains(str, "RSHIFT"):
+		fmt.Sscanf(str, "%s RSHIFT %s -> %s", &in1, &in2, &out)
+		contents = makeBinaryContents(out, in1, in2, ">>")
+	default:
+		fmt.Sscanf(str, "%s -> %s", &in1, &out)
+		contents = makeUnaryContents(out, in1, "")
 	}
 
 	// create package
