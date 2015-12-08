@@ -5,14 +5,12 @@ input = "(((())))()((((((((())()(()))(()((((()(()(((()((()((()(()()()()()))(((()
 
 part1 :: String -> Int
 part1 str = (count '(' str) - (count ')' str) where
-	count x xs = length . filter (x ==) $ xs
+	count x = length . filter (x ==)
 
 part2 :: String -> Int
-part2 str = length . takeWhile ((/= -1) . pos) . inits $ str where
-	pos xs = sum . map delta $ xs
-	delta '(' = 1
-	delta ')' = -1
-	delta _   = 0
+part2 = length . takeWhile (/= -1) . scanl climb 0 where
+	climb n '(' = n+1
+	climb n ')' = n-1
 
 main :: IO ()
 main = do
