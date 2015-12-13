@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strconv"
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `1113222113`
@@ -21,7 +21,7 @@ func split(str string) []string {
 func lookandsay(str string) string {
 	var end string
 	for _, nums := range split(str) {
-		end += strconv.Itoa(len(nums)) + nums[:1]
+		end += utils.Itoa(len(nums)) + nums[:1]
 	}
 	return end
 }

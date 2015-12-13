@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `af AND ah -> ai
@@ -365,42 +366,42 @@ func parse(str string) action {
 	var a, b, c string
 	switch {
 	case strings.Contains(str, "NOT"):
-		fmt.Sscanf(str, "NOT %s -> %s", &a, &b)
+		utils.Sscanf(str, "NOT %s -> %s", &a, &b)
 		act.inputs = []string{a}
 		act.output = b
 		act.fn = func(ins ...uint16) uint16 {
 			return ^ins[0]
 		}
 	case strings.Contains(str, "AND"):
-		fmt.Sscanf(str, "%s AND %s -> %s", &a, &b, &c)
+		utils.Sscanf(str, "%s AND %s -> %s", &a, &b, &c)
 		act.inputs = []string{a, b}
 		act.output = c
 		act.fn = func(ins ...uint16) uint16 {
 			return ins[0] & ins[1]
 		}
 	case strings.Contains(str, "OR"):
-		fmt.Sscanf(str, "%s OR %s -> %s", &a, &b, &c)
+		utils.Sscanf(str, "%s OR %s -> %s", &a, &b, &c)
 		act.inputs = []string{a, b}
 		act.output = c
 		act.fn = func(ins ...uint16) uint16 {
 			return ins[0] | ins[1]
 		}
 	case strings.Contains(str, "LSHIFT"):
-		fmt.Sscanf(str, "%s LSHIFT %s -> %s", &a, &b, &c)
+		utils.Sscanf(str, "%s LSHIFT %s -> %s", &a, &b, &c)
 		act.inputs = []string{a, b}
 		act.output = c
 		act.fn = func(ins ...uint16) uint16 {
 			return ins[0] << ins[1]
 		}
 	case strings.Contains(str, "RSHIFT"):
-		fmt.Sscanf(str, "%s RSHIFT %s -> %s", &a, &b, &c)
+		utils.Sscanf(str, "%s RSHIFT %s -> %s", &a, &b, &c)
 		act.inputs = []string{a, b}
 		act.output = c
 		act.fn = func(ins ...uint16) uint16 {
 			return ins[0] >> ins[1]
 		}
 	default:
-		fmt.Sscanf(str, "%s -> %s", &a, &b)
+		utils.Sscanf(str, "%s -> %s", &a, &b)
 		act.inputs = []string{a}
 		act.output = b
 		act.fn = func(ins ...uint16) uint16 {
@@ -429,7 +430,7 @@ func calculate(actions map[string]action, wire string, memo map[string]uint16) u
 func main() {
 	// part 1
 	actions := make(map[string]action)
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		act := parse(str)
 		actions[act.output] = act
 	}

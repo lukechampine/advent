@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `toggle 461,550 through 564,900
@@ -324,13 +325,13 @@ func parseOp1(s string) op1 {
 	var o op1
 	switch {
 	case strings.HasPrefix(s, "turn on"):
-		fmt.Sscanf(s, "turn on %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "turn on %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(bool) bool { return true }
 	case strings.HasPrefix(s, "turn off"):
-		fmt.Sscanf(s, "turn off %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "turn off %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(bool) bool { return false }
 	case strings.HasPrefix(s, "toggle"):
-		fmt.Sscanf(s, "toggle %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "toggle %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(b bool) bool { return !b }
 	}
 	return o
@@ -354,10 +355,10 @@ func parseOp2(s string) op2 {
 	var o op2
 	switch {
 	case strings.HasPrefix(s, "turn on"):
-		fmt.Sscanf(s, "turn on %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "turn on %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(i int) int { return i + 1 }
 	case strings.HasPrefix(s, "turn off"):
-		fmt.Sscanf(s, "turn off %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "turn off %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(i int) int {
 			if i == 0 {
 				return i
@@ -366,7 +367,7 @@ func parseOp2(s string) op2 {
 			}
 		}
 	case strings.HasPrefix(s, "toggle"):
-		fmt.Sscanf(s, "toggle %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
+		utils.Sscanf(s, "toggle %d,%d through %d,%d", &o.x1, &o.y1, &o.x2, &o.y2)
 		o.action = func(i int) int { return i + 2 }
 	}
 	return o
@@ -375,7 +376,7 @@ func parseOp2(s string) op2 {
 func main() {
 	// part 1
 	var lights [1000][1000]bool
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		op := parseOp1(str)
 		op.apply(&lights)
 	}
@@ -391,7 +392,7 @@ func main() {
 
 	// part 2
 	var dimlights [1000][1000]int
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		op := parseOp2(str)
 		op.apply(&dimlights)
 	}

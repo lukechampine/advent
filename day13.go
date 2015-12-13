@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"strings"
+
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `Alice would gain 54 happiness units by sitting next to Bob.
@@ -69,11 +69,10 @@ type person struct {
 }
 
 func parse(str string, m map[string]person) {
-	str = strings.TrimSuffix(str, ".") // otherwise . is added to name2
-
 	var name1, sign, name2 string
 	var mag int
-	fmt.Sscanf(str, "%s would %s %d happiness units by sitting next to %s", &name1, &sign, &mag, &name2)
+	str = strings.TrimSuffix(str, ".") // otherwise . is added to name2
+	utils.Sscanf(str, "%s would %s %d happiness units by sitting next to %s", &name1, &sign, &mag, &name2)
 	if _, ok := m[name1]; !ok {
 		m[name1] = person{
 			name: name1,
@@ -104,7 +103,7 @@ func calcHappiness(seating []person) int {
 func main() {
 	// part 1
 	m := make(map[string]person)
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		parse(str, m)
 	}
 	var guests []person
@@ -113,9 +112,9 @@ func main() {
 	}
 
 	var optimal int
-	for n := 0; n < 50000; n++ {
+	for _, perm := range utils.Perms(len(guests)) {
 		seating := make([]person, len(guests))
-		for si, gi := range rand.Perm(len(guests)) {
+		for si, gi := range perm {
 			seating[si] = guests[gi]
 		}
 		happiness := calcHappiness(seating)
@@ -138,9 +137,9 @@ func main() {
 	guests = append(guests, m["Me"])
 
 	optimal = 0
-	for n := 0; n < 100000; n++ {
+	for _, perm := range utils.Perms(len(guests)) {
 		seating := make([]person, len(guests))
-		for si, gi := range rand.Perm(len(guests)) {
+		for si, gi := range perm {
 			seating[si] = guests[gi]
 		}
 		happiness := calcHappiness(seating)

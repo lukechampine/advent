@@ -2,6 +2,8 @@ package main
 
 import (
 	"strings"
+
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `hxbxwxba`
@@ -40,7 +42,7 @@ func rule3(str string) bool {
 }
 
 func valid(pw string) bool {
-	return rule1(pw) && rule2(pw) && rule3(pw)
+	return utils.And(rule1(pw), rule2(pw), rule3(pw))
 }
 
 func nextPassword(pw string) string {

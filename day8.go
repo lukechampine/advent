@@ -2,7 +2,8 @@ package main
 
 import (
 	"strconv"
-	"strings"
+
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `"\xa8br\x8bjr\""
@@ -318,14 +319,14 @@ func quote(str string) string {
 func main() {
 	// part 1
 	var total int
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		total += len(str) - len(unquote(str))
 	}
 	println(total)
 
 	// part 2
 	total = 0
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		total += len(quote(str)) - len(str)
 	}
 	println(total)

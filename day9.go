@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"strings"
+	"github.com/lukechampine/advent/utils"
 )
 
 const input = `Tristram to AlphaCentauri = 34
@@ -42,14 +40,14 @@ type route struct {
 
 func parse(str string) route {
 	var r route
-	fmt.Sscanf(str, "%s to %s = %d", &r.from, &r.to, &r.dist)
+	utils.Sscanf(str, "%s to %s = %d", &r.from, &r.to, &r.dist)
 	return r
 }
 
 func main() {
 	// part 1
 	cities := make(map[string]map[string]int)
-	for _, str := range strings.Split(input, "\n") {
+	for _, str := range utils.Lines(input) {
 		r := parse(str)
 		if _, ok := cities[r.from]; !ok {
 			cities[r.from] = make(map[string]int)
@@ -66,31 +64,25 @@ func main() {
 	}
 
 	var shortest int = 999999999
-	for n := 0; n < 50000; n++ {
+	for _, perm := range utils.Perms(len(names)) {
 		var dist int
-		order := rand.Perm(len(names))
-		for i := 0; i < len(order)-1; i++ {
-			from, to := names[order[i]], names[order[i+1]]
+		for i := 0; i < len(perm)-1; i++ {
+			from, to := names[perm[i]], names[perm[i+1]]
 			dist += cities[from][to]
 		}
-		if dist < shortest {
-			shortest = dist
-		}
+		shortest = utils.Min(shortest, dist)
 	}
-	fmt.Println(shortest)
+	println(shortest)
 
 	// part 2
 	var longest int
-	for n := 0; n < 50000; n++ {
+	for _, perm := range utils.Perms(len(names)) {
 		var dist int
-		order := rand.Perm(len(names))
-		for i := 0; i < len(order)-1; i++ {
-			from, to := names[order[i]], names[order[i+1]]
+		for i := 0; i < len(perm)-1; i++ {
+			from, to := names[perm[i]], names[perm[i+1]]
 			dist += cities[from][to]
 		}
-		if dist > longest {
-			longest = dist
-		}
+		longest = utils.Max(longest, dist)
 	}
-	fmt.Println(longest)
+	println(longest)
 }
