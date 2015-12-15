@@ -22,6 +22,24 @@ func Min(x, y int) int {
 	return y
 }
 
+// Maximum returns the maximum value of fn mapped over the range [0,n).
+func Maximum(n int, fn func(int) int) int {
+	max := ^int(^uint(0) >> 1) // smallest possible integer
+	for i := 0; i < n; i++ {
+		max = Max(max, fn(i))
+	}
+	return max
+}
+
+// Minimum returns the minimum value of fn mapped over the range [0,n).
+func Minimum(n int, fn func(int) int) int {
+	min := int(^uint(0) >> 1) // largest possible integer
+	for i := 0; i < n; i++ {
+		min = Min(min, fn(i))
+	}
+	return min
+}
+
 // And returns true if all of its arguments are true.
 func And(preds ...bool) bool {
 	for _, pred := range preds {

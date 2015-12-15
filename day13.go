@@ -111,18 +111,16 @@ func main() {
 		guests = append(guests, guest)
 	}
 
-	var optimal int
-	for _, perm := range utils.Perms(len(guests)) {
+	perms := utils.Perms(len(guests))
+	happyFn := func(i int) int {
 		seating := make([]person, len(guests))
-		for si, gi := range perm {
+		for si, gi := range perms[i] {
 			seating[si] = guests[gi]
 		}
-		happiness := calcHappiness(seating)
-		if happiness > optimal {
-			optimal = happiness
-		}
+		return calcHappiness(seating)
 	}
-	println(optimal)
+
+	println(utils.Maximum(len(perms), happyFn))
 
 	// part 2
 	myHapp := make(map[string]int)
@@ -135,17 +133,7 @@ func main() {
 		happ: myHapp,
 	}
 	guests = append(guests, m["Me"])
+	perms = utils.Perms(len(guests))
 
-	optimal = 0
-	for _, perm := range utils.Perms(len(guests)) {
-		seating := make([]person, len(guests))
-		for si, gi := range perm {
-			seating[si] = guests[gi]
-		}
-		happiness := calcHappiness(seating)
-		if happiness > optimal {
-			optimal = happiness
-		}
-	}
-	println(optimal)
+	println(utils.Maximum(len(perms), happyFn))
 }

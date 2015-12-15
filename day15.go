@@ -74,18 +74,16 @@ func main() {
 	for _, str := range utils.Lines(input) {
 		is = append(is, parse(str))
 	}
-	var optimal int
-	for _, props := range proportions(len(is), 100) {
-		optimal = utils.Max(optimal, score(is, props))
-	}
-	println(optimal)
+	props := proportions(len(is), 100)
+	println(utils.Maximum(len(props), func(i int) int {
+		return score(is, props[i])
+	}))
 
 	// part 2
-	optimal = 0
-	for _, props := range proportions(len(is), 100) {
-		if calories(is, props) == 500 {
-			optimal = utils.Max(optimal, score(is, props))
+	println(utils.Maximum(len(props), func(i int) int {
+		if calories(is, props[i]) == 500 {
+			return score(is, props[i])
 		}
-	}
-	println(optimal)
+		return 0
+	}))
 }

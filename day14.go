@@ -44,25 +44,23 @@ func main() {
 	for _, str := range utils.Lines(input) {
 		rs = append(rs, parse(str))
 	}
-	var farthest int
-	for _, r := range rs {
-		farthest = utils.Max(farthest, r.dist(2503))
-	}
-	println(farthest)
+	println(utils.Maximum(len(rs), func(i int) int {
+		return rs[i].dist(2503)
+	}))
 
 	// part 2
 	points := make(map[string]int)
 	for i := 0; i < 2503; i++ {
-		var farthest int
-		for _, r := range rs {
-			farthest = utils.Max(farthest, r.dist(i+1))
-		}
+		farthest := utils.Maximum(len(rs), func(j int) int {
+			return rs[j].dist(i + 1)
+		})
 		for _, r := range rs {
 			if r.dist(i+1) == farthest {
 				points[r.name]++
 			}
 		}
 	}
+
 	var mostPoints int
 	for _, p := range points {
 		mostPoints = utils.Max(mostPoints, p)

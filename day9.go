@@ -63,26 +63,18 @@ func main() {
 		names = append(names, name)
 	}
 
-	var shortest int = 999999999
-	for _, perm := range utils.Perms(len(names)) {
+	perms := utils.Perms(len(names))
+	distFn := func(i int) int {
+		perm := perms[i]
 		var dist int
-		for i := 0; i < len(perm)-1; i++ {
-			from, to := names[perm[i]], names[perm[i+1]]
+		for j := 0; j < len(perm)-1; j++ {
+			from, to := names[perm[j]], names[perm[j+1]]
 			dist += cities[from][to]
 		}
-		shortest = utils.Min(shortest, dist)
+		return dist
 	}
-	println(shortest)
+	println(utils.Minimum(len(perms), distFn))
 
 	// part 2
-	var longest int
-	for _, perm := range utils.Perms(len(names)) {
-		var dist int
-		for i := 0; i < len(perm)-1; i++ {
-			from, to := names[perm[i]], names[perm[i+1]]
-			dist += cities[from][to]
-		}
-		longest = utils.Max(longest, dist)
-	}
-	println(longest)
+	println(utils.Maximum(len(perms), distFn))
 }
