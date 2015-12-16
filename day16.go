@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/lukechampine/advent/utils"
 )
 
@@ -506,131 +508,48 @@ Sue 499: cats: 6, children: 3, perfumes: 0
 Sue 500: pomeranians: 10, cats: 3, vizslas: 5`
 
 type aunt struct {
-	number      int
-	children    int
-	cats        int
-	samoyeds    int
-	pomeranians int
-	akitas      int
-	vizslas     int
-	goldfish    int
-	trees       int
-	cars        int
-	perfumes    int
-}
-
-func (a *aunt) add(item string, n int) {
-	switch item {
-	case "children:":
-		a.children = n
-	case "cats:":
-		a.cats = n
-	case "samoyeds:":
-		a.samoyeds = n
-	case "pomeranians:":
-		a.pomeranians = n
-	case "akitas:":
-		a.akitas = n
-	case "vizslas:":
-		a.vizslas = n
-	case "goldfish:":
-		a.goldfish = n
-	case "trees:":
-		a.trees = n
-	case "cars:":
-		a.cars = n
-	case "perfumes:":
-		a.perfumes = n
-	}
+	number int
+	props  map[string]int
 }
 
 func (a aunt) match1(b aunt) bool {
-	if a.children != -1 && a.children != b.children {
-		return false
-	}
-	if a.cats != -1 && a.cats != b.cats {
-		return false
-	}
-	if a.samoyeds != -1 && a.samoyeds != b.samoyeds {
-		return false
-	}
-	if a.pomeranians != -1 && a.pomeranians != b.pomeranians {
-		return false
-	}
-	if a.akitas != -1 && a.akitas != b.akitas {
-		return false
-	}
-	if a.vizslas != -1 && a.vizslas != b.vizslas {
-		return false
-	}
-	if a.goldfish != -1 && a.goldfish != b.goldfish {
-		return false
-	}
-	if a.trees != -1 && a.trees != b.trees {
-		return false
-	}
-	if a.cars != -1 && a.cars != b.cars {
-		return false
-	}
-	if a.perfumes != -1 && a.perfumes != b.perfumes {
-		return false
+	for prop, val := range a.props {
+		if b.props[prop] != val {
+			return false
+		}
 	}
 	return true
 }
 
 func (a aunt) match2(b aunt) bool {
-	if a.children != -1 && a.children != b.children {
-		return false
-	}
-	if a.cats != -1 && a.cats < b.cats {
-		return false
-	}
-	if a.samoyeds != -1 && a.samoyeds != b.samoyeds {
-		return false
-	}
-	if a.pomeranians != -1 && a.pomeranians > b.pomeranians {
-		return false
-	}
-	if a.akitas != -1 && a.akitas != b.akitas {
-		return false
-	}
-	if a.vizslas != -1 && a.vizslas != b.vizslas {
-		return false
-	}
-	if a.goldfish != -1 && a.goldfish > b.goldfish {
-		return false
-	}
-	if a.trees != -1 && a.trees < b.trees {
-		return false
-	}
-	if a.cars != -1 && a.cars != b.cars {
-		return false
-	}
-	if a.perfumes != -1 && a.perfumes != b.perfumes {
-		return false
+	for prop, val := range a.props {
+		switch prop {
+		case "children", "samoyeds", "akitas", "vizslas", "cars", "perfumes":
+			if b.props[prop] != val {
+				return false
+			}
+		case "cats", "trees":
+			if b.props[prop] > val {
+				return false
+			}
+		case "pomeranians", "goldfish":
+			if b.props[prop] < val {
+				return false
+			}
+		}
 	}
 	return true
 }
 
 func parse(str string) aunt {
-	a := aunt{
-		children:    -1,
-		cats:        -1,
-		samoyeds:    -1,
-		pomeranians: -1,
-		akitas:      -1,
-		vizslas:     -1,
-		goldfish:    -1,
-		trees:       -1,
-		cars:        -1,
-		perfumes:    -1,
-	}
-	var item1, item2, item3 string
+	var a aunt
+	a.props = make(map[string]int)
+	var prop1, prop2, prop3 string
 	var n1, n2, n3 int
-	utils.Sscanf(str, "Sue %d: %s %d, %s %d, %s %d", &a.number, &item1, &n1, &item2, &n2, &item3, &n3)
-	a.add(item1, n1)
-	a.add(item2, n2)
-	a.add(item3, n3)
+	utils.Sscanf(str, "Sue %d: %s %d, %s %d, %s %d", &a.number, &prop1, &n1, &prop2, &n2, &prop3, &n3)
+	a.props[strings.TrimSuffix(prop1, ":")] = n1
+	a.props[strings.TrimSuffix(prop2, ":")] = n2
+	a.props[strings.TrimSuffix(prop3, ":")] = n3
 	return a
 }
 
@@ -641,16 +560,18 @@ func main() {
 		aunts = append(aunts, parse(str))
 	}
 	search := aunt{
-		children:    3,
-		cats:        7,
-		samoyeds:    2,
-		pomeranians: 3,
-		akitas:      0,
-		vizslas:     0,
-		goldfish:    5,
-		trees:       3,
-		cars:        2,
-		perfumes:    1,
+		props: map[string]int{
+			"children":    3,
+			"cats":        7,
+			"samoyeds":    2,
+			"pomeranians": 3,
+			"akitas":      0,
+			"vizslas":     0,
+			"goldfish":    5,
+			"trees":       3,
+			"cars":        2,
+			"perfumes":    1,
+		},
 	}
 	var match int
 	for _, a := range aunts {
