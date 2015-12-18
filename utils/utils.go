@@ -87,6 +87,11 @@ func Sscanf(str, format string, args ...interface{}) {
 	}
 }
 
+// Println is a passthrough for fmt.Println.
+func Println(args ...interface{}) {
+	fmt.Println(args...)
+}
+
 func interleave(n int, perms [][]int) [][]int {
 	leaved := make([][]int, 0, len(perms)*(n+1))
 	for _, perm := range perms {
@@ -107,5 +112,17 @@ func Perms(n int) [][]int {
 		return [][]int{{0}}
 	}
 	perms := Perms(n - 1)
-	return interleave(n-1, perms)
+
+	// interleave
+	leaved := make([][]int, 0, len(perms)*n)
+	for _, perm := range perms {
+		for i := 0; i <= len(perm); i++ {
+			withN := make([]int, len(perm)+1)
+			copy(withN[:i], perm[:i])
+			withN[i] = n - 1
+			copy(withN[i+1:], perm[i:])
+			leaved = append(leaved, withN)
+		}
+	}
+	return leaved
 }
