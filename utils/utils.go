@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+// Abs returns the absolute value of x.
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 // Min returns the greater of x and y.
 func Max(x, y int) int {
 	if x > y {
@@ -79,6 +87,11 @@ func Atoi(s string) int {
 	return i
 }
 
+// Split is a passthrough for strings.Split.
+func Split(s string, sep string) []string {
+	return strings.Split(s, sep)
+}
+
 // Sscanf is a passthrough for fmt.Sscanf that panics upon failure.
 func Sscanf(str, format string, args ...interface{}) {
 	_, err := fmt.Sscanf(str, format, args...)
@@ -90,20 +103,6 @@ func Sscanf(str, format string, args ...interface{}) {
 // Println is a passthrough for fmt.Println.
 func Println(args ...interface{}) {
 	fmt.Println(args...)
-}
-
-func interleave(n int, perms [][]int) [][]int {
-	leaved := make([][]int, 0, len(perms)*(n+1))
-	for _, perm := range perms {
-		for i := 0; i <= len(perm); i++ {
-			withN := make([]int, len(perm)+1)
-			copy(withN[:i], perm[:i])
-			withN[i] = n
-			copy(withN[i+1:], perm[i:])
-			leaved = append(leaved, withN)
-		}
-	}
-	return leaved
 }
 
 // Perms returns all possible permutations of the numbers [0,n).
