@@ -57,5 +57,6 @@ func main() {
 	// part 1
 	println(password(input))
 
+	// part 2
 	println(password2(input))
 }
