@@ -1914,7 +1914,7 @@ func (t tri) possible() bool {
 		t[2]+t[0] > t[1]
 }
 
-func parse(str string) []tri {
+func parseRow(str string) []tri {
 	var tris []tri
 	for _, s := range utils.Split(str, "\n") {
 		var t tri
@@ -1924,7 +1924,7 @@ func parse(str string) []tri {
 	return tris
 }
 
-func parse2(str string) []tri {
+func parseCol(str string) []tri {
 	var tris []tri
 	lines := utils.Split(str, "\n")
 	for i := 0; i < len(lines); i += 3 {
@@ -1949,10 +1949,10 @@ func countPossible(tris []tri) int {
 
 func main() {
 	// part 1
-	tris := parse(input)
+	tris := parseRow(input)
 	println(countPossible(tris))
 
 	// part 2
-	tris = parse2(input)
+	tris = parseCol(input)
 	println(countPossible(tris))
 }

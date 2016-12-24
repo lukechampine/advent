@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"strings"
 
 	"github.com/lukechampine/advent/utils"
 )
@@ -10,12 +11,7 @@ import (
 const input = `uqwqemis`
 
 func fivezeros(h string) bool {
-	for _, b := range h[:5] {
-		if b != '0' {
-			return false
-		}
-	}
-	return true
+	return strings.HasPrefix(h, "00000")
 }
 
 func nextHash(str string, count int) string {

@@ -8,32 +8,28 @@ RRRULLRULDRDLDUDRRDULLRLUUDLULLRUULULURDDDLLLULRURLLURUDLRDLURRRLRLDLLRRURUDLDLR
 URLDDDLDRDDDURRRLURRRRLULURLDDUDRDUDDLURURLLRDURDDRLRUURLDLLRDLRUUURLRLDLDRUDDDULLDULLDUULURLDRDUDRRLRRLULRDDULUDULDULLULDLRRLRRLLULRULDLLDULRRLDURRRRDLURDLUDUUUDLURRRRRUDDUDUUDULDLURRDRLRLUDUDUUDULDDURUDDRDRUDLRRUDRULDULRDRLDRUDRLLRUUDDRLURURDRRLRURULLDUUDRDLULRUULUDURRULLRLUUUUUDULRLUUDRDUUULLULUDUDDLLRRLDURRDDDLUDLUUDULUUULDLLLLUUDURRUDUDLULDRRRULLLURDURDDLRRULURUDURULRDRULLRURURRUDUULRULUUDDUDDUURLRLURRRRDLULRRLDRRDURUDURULULLRUURLLDRDRURLLLUUURUUDDDLDURRLLUUUUURLLDUDLRURUUUDLRLRRLRLDURURRURLULDLRDLUDDULLDUDLULLUUUDLRLDUURRR
 RLLDRDURRUDULLURLRLLURUDDLULUULRRRDRLULDDRLUDRDURLUULDUDDDDDUDDDDLDUDRDRRLRLRLURDURRURDLURDURRUUULULLUURDLURDUURRDLDLDDUURDDURLDDDRUURLDURRURULURLRRLUDDUDDDLLULUDUUUDRULLLLULLRDDRDLRDRRDRRDLDLDDUURRRDDULRUUURUDRDDLRLRLRRDLDRDLLDRRDLLUULUDLLUDUUDRDLURRRRULDRDRUDULRLLLLRRULDLDUUUURLDULDDLLDDRLLURLUDULURRRUULURDRUDLRLLLRDDLULLDRURDDLLDUDRUDRLRRLULLDRRDULDLRDDRDUURDRRRLRDLDUDDDLLUDURRUUULLDRLUDLDRRRRDDDLLRRDUURURLRURRDUDUURRDRRUDRLURLUDDDLUDUDRDRURRDDDDRDLRUDRDRLLDULRURULULDRLRLRRLDURRRUL`
 
-type pos struct {
-	x, y int
-}
-
-func key(keypad [][]string, p pos) string {
-	if p.x >= len(keypad) || p.x < 0 || p.y < 0 || p.y >= len(keypad) {
+func key(keypad [][]string, p utils.Pos) string {
+	if p.X >= len(keypad) || p.X < 0 || p.Y < 0 || p.Y >= len(keypad) {
 		return " "
 	}
-	return keypad[p.y][p.x]
+	return keypad[p.Y][p.X]
 }
 
-func move(p pos, dir rune) pos {
+func move(p utils.Pos, dir rune) utils.Pos {
 	switch dir {
 	case 'U':
-		p.y--
+		p.Y--
 	case 'D':
-		p.y++
+		p.Y++
 	case 'R':
-		p.x++
+		p.X++
 	case 'L':
-		p.x--
+		p.X--
 	}
 	return p
 }
 
-func follow(p pos, keypad [][]string, dirs []string) string {
+func follow(p utils.Pos, keypad [][]string, dirs []string) string {
 	var keys string
 	for _, line := range dirs {
 		for _, d := range line {
@@ -49,7 +45,7 @@ func follow(p pos, keypad [][]string, dirs []string) string {
 func main() {
 	// part 1
 	dirs := utils.Split(input, "\n")
-	p := pos{1, 1}
+	p := utils.Pos{1, 1}
 	keypad := [][]string{
 		{"1", "2", "3"},
 		{"4", "5", "6"},
@@ -58,7 +54,7 @@ func main() {
 	utils.Println(follow(p, keypad, dirs))
 
 	// part 2
-	p = pos{0, 2}
+	p = utils.Pos{0, 2}
 	keypad = [][]string{
 		{" ", " ", "1", " ", " "},
 		{" ", "2", "3", "4", " "},

@@ -130,6 +130,10 @@ type Pos struct {
 	X, Y int
 }
 
+func (p Pos) Dist(q Pos) int {
+	return Abs(p.X-q.X) + Abs(p.Y-q.Y)
+}
+
 func (p Pos) Moves() []Pos {
 	return []Pos{
 		{p.X, p.Y - 1},

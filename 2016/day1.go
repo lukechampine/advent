@@ -9,35 +9,6 @@ type dir struct {
 	length int
 }
 
-type pos struct {
-	x, y int
-}
-
-func (p *pos) dist() int {
-	return utils.Abs(p.x) + utils.Abs(p.y)
-}
-
-const (
-	// turning left
-	north = iota
-	west
-	south
-	east
-)
-
-func walk(p *pos, orientation int, length int) {
-	switch orientation {
-	case north:
-		p.y += length
-	case south:
-		p.y -= length
-	case east:
-		p.x += length
-	case west:
-		p.x -= length
-	}
-}
-
 func parse(str string) []dir {
 	var dirs []dir
 	for _, d := range utils.Split(str, ", ") {
@@ -49,9 +20,30 @@ func parse(str string) []dir {
 	return dirs
 }
 
-func follow(dirs []dir) pos {
-	var p pos  // starting position
-	o := north // starting orientation
+const (
+	// turning left
+	north = iota
+	west
+	south
+	east
+)
+
+func walk(p *utils.Pos, orientation int, length int) {
+	switch orientation {
+	case north:
+		p.Y += length
+	case south:
+		p.Y -= length
+	case east:
+		p.X += length
+	case west:
+		p.X -= length
+	}
+}
+
+func follow(dirs []dir) utils.Pos {
+	var p utils.Pos // starting position
+	o := north      // starting orientation
 	for _, d := range dirs {
 		if d.left {
 			o = (o + 1) % 4
@@ -63,10 +55,10 @@ func follow(dirs []dir) pos {
 	return p
 }
 
-func visitTwice(dirs []dir) pos {
-	visited := make(map[pos]bool)
-	var p pos  // starting position
-	o := north // starting orientation
+func visitTwice(dirs []dir) utils.Pos {
+	visited := make(map[utils.Pos]bool)
+	var p utils.Pos // starting position
+	o := north      // starting orientation
 	visited[p] = true
 	for _, d := range dirs {
 		if d.left {
@@ -90,9 +82,9 @@ func main() {
 	// part 1
 	dirs := parse(input)
 	end := follow(dirs)
-	println(end.dist())
+	println(end.Dist(utils.Pos{0, 0}))
 
 	// part 2
 	end = visitTwice(dirs)
-	println(end.dist())
+	println(end.Dist(utils.Pos{0, 0}))
 }
