@@ -48,46 +48,30 @@ const input = `#################################################################
 #...#.#...#.#.......#.......#.....#...#.......#...#...#...#.....#.#.....#...#.#...#.....#.#.........#.#.#.....#.....#...#.........#.#.#.......#.........#...#.....#.#...#.#...#.....#...#
 #########################################################################################################################################################################################`
 
-const input2 = `###########
-#0.1.....2#
-#.#######.#
-#4.......3#
-###########`
-
 type maze struct {
-	walls [][]bool
-	grid  utils.Grid
-	locs  []utils.Pos
-}
-
-func (m maze) validMoves(cur utils.Pos) []utils.Pos {
-	ps := cur.ValidMoves(m.grid)
-	notwall := ps[:0]
-	for _, p := range ps {
-		if !m.walls[p.Y][p.X] {
-			notwall = append(notwall, p)
-		}
-	}
-	return notwall
+	utils.Maze
+	locs []utils.Pos
 }
 
 func parse(str string) maze {
 	lines := utils.Lines(str)
-	m := maze{
-		grid: utils.Grid{len(lines[0]), len(lines)},
-		locs: make([]utils.Pos, 8),
+	var m maze
+	m.X = len(lines[0])
+	m.Y = len(lines)
+	m.IsWall = func(p utils.Pos) bool {
+		return lines[p.Y][p.X] == '#'
 	}
-	m.walls = make([][]bool, m.grid.Y)
-	for i := range m.walls {
-		m.walls[i] = make([]bool, m.grid.X)
-	}
+	// search for each location
+	locs := make(map[int]utils.Pos)
 	for y, line := range lines {
 		for x, c := range line {
-			m.walls[y][x] = c == '#'
 			if n, err := strconv.Atoi(string(c)); err == nil {
-				m.locs[n] = utils.Pos{x, y}
+				locs[n] = utils.Pos{x, y}
 			}
 		}
+	}
+	for i := 0; i < len(locs); i++ {
+		m.locs = append(m.locs, locs[i])
 	}
 	return m
 }
@@ -98,30 +82,12 @@ func locDists(m maze) [][]int {
 		dists[i] = make([]int, len(m.locs))
 	}
 	for i, a := range m.locs {
-		dist := distancesFrom(m, a)
+		dist := m.DistancesFrom(a)
 		for j, b := range m.locs {
 			dists[i][j] = dist[b]
 		}
 	}
 	return dists
-}
-
-func distancesFrom(m maze, cur utils.Pos) map[utils.Pos]int {
-	dist := make(map[utils.Pos]int)
-	recdistances(m, dist, 0, cur)
-	return dist
-}
-
-func recdistances(m maze, distances map[utils.Pos]int, dist int, cur utils.Pos) {
-	distances[cur] = dist
-
-	for _, p := range m.validMoves(cur) {
-		if d, ok := distances[p]; ok && d <= dist+1 {
-			// already saw this position, and took fewer steps to reach it
-			continue
-		}
-		recdistances(m, distances, dist+1, p)
-	}
 }
 
 func shortestPath(m maze, dists [][]int) int {

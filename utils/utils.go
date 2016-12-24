@@ -130,14 +130,6 @@ type Pos struct {
 	X, Y int
 }
 
-type Grid struct {
-	X, Y int
-}
-
-func (g Grid) Valid(p Pos) bool {
-	return 0 <= p.X && p.X <= g.X && 0 <= p.Y && p.Y <= g.Y
-}
-
 func (p Pos) Moves() []Pos {
 	return []Pos{
 		{p.X, p.Y - 1},
@@ -145,16 +137,6 @@ func (p Pos) Moves() []Pos {
 		{p.X - 1, p.Y},
 		{p.X + 1, p.Y},
 	}
-}
-
-func (p Pos) ValidMoves(g Grid) []Pos {
-	var valid []Pos
-	for _, m := range p.Moves() {
-		if g.Valid(m) {
-			valid = append(valid, m)
-		}
-	}
-	return valid
 }
 
 func (p Pos) Numpad() []Pos {
@@ -170,6 +152,43 @@ func (p Pos) Numpad() []Pos {
 	}
 }
 
+type Grid struct {
+	X, Y int
+}
+
+func (g Grid) Valid(p Pos) bool {
+	return 0 <= p.X && p.X <= g.X && 0 <= p.Y && p.Y <= g.Y
+}
+
+type Maze struct {
+	Grid
+	IsWall func(Pos) bool
+}
+
+func (m Maze) Valid(p Pos) bool {
+	return m.Grid.Valid(p) && !m.IsWall(p)
+}
+
+func (m Maze) ValidMoves(p Pos) []Pos {
+	var valid []Pos
+	for _, move := range p.Moves() {
+		if m.Valid(move) {
+			valid = append(valid, move)
+		}
+	}
+	return valid
+}
+
+func (p Pos) ValidMoves(g Grid) []Pos {
+	var valid []Pos
+	for _, m := range p.Moves() {
+		if g.Valid(m) {
+			valid = append(valid, m)
+		}
+	}
+	return valid
+}
+
 func (p Pos) ValidNumpad(g Grid) []Pos {
 	var valid []Pos
 	for _, m := range p.Numpad() {
@@ -178,4 +197,22 @@ func (p Pos) ValidNumpad(g Grid) []Pos {
 		}
 	}
 	return valid
+}
+
+func (m Maze) DistancesFrom(p Pos) map[Pos]int {
+	dist := make(map[Pos]int)
+	m.recdistances(dist, 0, p)
+	return dist
+}
+
+func (m Maze) recdistances(distances map[Pos]int, dist int, cur Pos) {
+	distances[cur] = dist
+
+	for _, p := range m.ValidMoves(cur) {
+		if d, ok := distances[p]; ok && d <= dist+1 {
+			// already saw this position, and took fewer steps to reach it
+			continue
+		}
+		m.recdistances(distances, dist+1, p)
+	}
 }
