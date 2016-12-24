@@ -125,3 +125,57 @@ func Perms(n int) [][]int {
 	}
 	return leaved
 }
+
+type Pos struct {
+	X, Y int
+}
+
+type Grid struct {
+	X, Y int
+}
+
+func (g Grid) Valid(p Pos) bool {
+	return 0 <= p.X && p.X <= g.X && 0 <= p.Y && p.Y <= g.Y
+}
+
+func (p Pos) Moves() []Pos {
+	return []Pos{
+		{p.X, p.Y - 1},
+		{p.X, p.Y + 1},
+		{p.X - 1, p.Y},
+		{p.X + 1, p.Y},
+	}
+}
+
+func (p Pos) ValidMoves(g Grid) []Pos {
+	var valid []Pos
+	for _, m := range p.Moves() {
+		if g.Valid(m) {
+			valid = append(valid, m)
+		}
+	}
+	return valid
+}
+
+func (p Pos) Numpad() []Pos {
+	return []Pos{
+		{p.X - 1, p.Y - 1},
+		{p.X - 1, p.Y + 0},
+		{p.X - 1, p.Y + 1},
+		{p.X + 0, p.Y - 1},
+		{p.X + 0, p.Y + 1},
+		{p.X + 1, p.Y - 1},
+		{p.X + 1, p.Y + 0},
+		{p.X + 1, p.Y + 1},
+	}
+}
+
+func (p Pos) ValidNumpad(g Grid) []Pos {
+	var valid []Pos
+	for _, m := range p.Numpad() {
+		if g.Valid(m) {
+			valid = append(valid, m)
+		}
+	}
+	return valid
+}
