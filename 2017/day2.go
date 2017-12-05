@@ -2,7 +2,6 @@ package main
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/lukechampine/advent/utils"
 )
@@ -27,10 +26,7 @@ const input = `737	1866	1565	1452	1908	1874	232	1928	201	241	922	281	1651	1740	1
 func parse(s string) [][]int {
 	var lines [][]int
 	for _, line := range utils.Lines(s) {
-		var nums []int
-		for _, num := range strings.Fields(line) {
-			nums = append(nums, utils.Atoi(num))
-		}
+		nums := utils.IntList(line)
 		sort.Ints(nums)
 		lines = append(lines, nums)
 	}

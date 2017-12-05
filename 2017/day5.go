@@ -1062,11 +1062,7 @@ const input = `2
 -943`
 
 func parse(s string) []int {
-	var nums []int
-	for _, n := range utils.Lines(s) {
-		nums = append(nums, utils.Atoi(n))
-	}
-	return nums
+	return utils.IntList(s)
 }
 
 func main() {

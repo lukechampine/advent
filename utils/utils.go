@@ -78,13 +78,32 @@ func Itoa(i int) string {
 	return strconv.Itoa(i)
 }
 
-// Itoa is a passthrough for strconv.Atoi that panics upon failure.
+// Atoi is a passthrough for strconv.Atoi that panics upon failure.
 func Atoi(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
 	}
 	return i
+}
+
+// Digits parses a string into its consituent digits.
+func Digits(s string) []int {
+	digits := make([]int, len(s))
+	for i, c := range s {
+		digits[i] = Atoi(string(c))
+	}
+	return digits
+}
+
+// IntList parses a list of ints.
+func IntList(s string) []int {
+	fs := strings.Fields(s)
+	ints := make([]int, len(fs))
+	for i, n := range fs {
+		ints[i] = Atoi(n)
+	}
+	return ints
 }
 
 // Split is a passthrough for strings.Split.
