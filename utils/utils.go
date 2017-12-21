@@ -48,6 +48,19 @@ func Minimum(n int, fn func(int) int) int {
 	return min
 }
 
+// MinimumIndex returns the integer in [0,n) that produces the smallest value
+// of fn.
+func MinimumIndex(n int, fn func(int) int) int {
+	min := int(^uint(0) >> 1) // largest possible integer
+	mini := -1
+	for i := 0; i < n; i++ {
+		if f := fn(i); f < min {
+			min, mini = f, i
+		}
+	}
+	return mini
+}
+
 // And returns true if all of its arguments are true.
 func And(preds ...bool) bool {
 	for _, pred := range preds {
