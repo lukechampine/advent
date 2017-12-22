@@ -252,3 +252,62 @@ func (m Maze) recdistances(distances map[Pos]int, dist int, cur Pos) {
 		m.recdistances(distances, dist+1, p)
 	}
 }
+
+type Dir int
+
+const (
+	Up Dir = iota
+	Right
+	Down
+	Left
+)
+
+func (d Dir) SpinRight(n int) Dir {
+	return (((d + Dir(n)) % 4) + 4) % 4
+}
+
+func (d Dir) TurnRight() Dir  { return d.SpinRight(1) }
+func (d Dir) TurnAround() Dir { return d.SpinRight(2) }
+func (d Dir) TurnLeft() Dir   { return d.SpinRight(-1) }
+
+type Agent struct {
+	Pos
+	Dir
+}
+
+func (a *Agent) MoveForward(n int) {
+	switch a.Dir {
+	case Up:
+		a.Y += n
+	case Right:
+		a.X += n
+	case Down:
+		a.Y -= n
+	case Left:
+		a.X -= n
+	}
+}
+
+func (a *Agent) MoveForwardArray(n int) {
+	switch a.Dir {
+	case Up:
+		a.Y -= n
+	case Right:
+		a.X += n
+	case Down:
+		a.Y += n
+	case Left:
+		a.X -= n
+	}
+}
+
+func (a *Agent) TurnRight()  { a.Dir = a.Dir.SpinRight(1) }
+func (a *Agent) TurnAround() { a.Dir = a.Dir.SpinRight(2) }
+func (a *Agent) TurnLeft()   { a.Dir = a.Dir.SpinRight(-1) }
+
+func NewAgent(x, y int, d Dir) Agent {
+	return Agent{
+		Pos: Pos{x, y},
+		Dir: d,
+	}
+}

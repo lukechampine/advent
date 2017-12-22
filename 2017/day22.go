@@ -49,13 +49,6 @@ func parse(s string) [][]int {
 }
 
 const (
-	up = iota
-	right
-	down
-	left
-)
-
-const (
 	clean = iota
 	weakened
 	infected
@@ -63,70 +56,46 @@ const (
 )
 
 type virus struct {
-	x, y     int
-	dir      int
+	utils.Agent
 	infected int
 }
 
 func (v *virus) burst(grid [][]int) {
-	if grid[v.y][v.x] == infected {
-		v.dir = (v.dir + 1) % 4 // turn right
-		grid[v.y][v.x] = clean
+	if grid[v.Y][v.X] == infected {
+		grid[v.Y][v.X] = clean
+		v.TurnRight()
 	} else {
-		v.dir = (v.dir + 3) % 4 // turn left
-		grid[v.y][v.x] = infected
+		grid[v.Y][v.X] = infected
+		v.TurnLeft()
 		v.infected++
 	}
-
-	switch v.dir {
-	case up:
-		v.y--
-	case right:
-		v.x++
-	case down:
-		v.y++
-	case left:
-		v.x--
-	}
+	v.MoveForwardArray(1)
 }
 
 func (v *virus) burst2(grid [][]int) {
-	switch grid[v.y][v.x] {
+	switch grid[v.Y][v.X] {
 	case clean:
-		grid[v.y][v.x] = weakened
-		v.dir = (v.dir + 3) % 4 // turn left
+		grid[v.Y][v.X] = weakened
+		v.TurnLeft()
 	case weakened:
-		grid[v.y][v.x] = infected
+		grid[v.Y][v.X] = infected
 		v.infected++
 	case infected:
-		grid[v.y][v.x] = flagged
-		v.dir = (v.dir + 1) % 4 // turn right
+		grid[v.Y][v.X] = flagged
+		v.TurnRight()
 	case flagged:
-		grid[v.y][v.x] = clean
-		v.dir = (v.dir + 2) % 4 // turn around
+		grid[v.Y][v.X] = clean
+		v.TurnAround()
 	}
-
-	switch v.dir {
-	case up:
-		v.y--
-	case right:
-		v.x++
-	case down:
-		v.y++
-	case left:
-		v.x--
-	}
+	v.MoveForwardArray(1)
 }
 
 func main() {
 	// part 1
 	grid := parse(input)
 	v := virus{
-		x:   len(grid[0]) / 2,
-		y:   len(grid) / 2,
-		dir: up,
+		Agent: utils.NewAgent(len(grid[0])/2, len(grid)/2, utils.Up),
 	}
-
 	for i := 0; i < 10000; i++ {
 		v.burst(grid)
 	}
@@ -135,11 +104,8 @@ func main() {
 	// part 2
 	grid = parse(input)
 	v = virus{
-		x:   len(grid[0]) / 2,
-		y:   len(grid) / 2,
-		dir: up,
+		Agent: utils.NewAgent(len(grid[0])/2, len(grid)/2, utils.Up),
 	}
-
 	for i := 0; i < 10000000; i++ {
 		v.burst2(grid)
 	}
