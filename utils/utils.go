@@ -119,6 +119,15 @@ func IntList(s string) []int {
 	return ints
 }
 
+// IntSum returns the sum of a list of ints.
+func IntSum(xs []int) int {
+	sum := 0
+	for _, x := range xs {
+		sum += x
+	}
+	return sum
+}
+
 // Split is a passthrough for strings.Split.
 func Split(s string, sep string) []string {
 	return strings.Split(s, sep)
