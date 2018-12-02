@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -126,6 +127,36 @@ func IntSum(xs []int) int {
 		sum += x
 	}
 	return sum
+}
+
+// CharCounts returns the count of each character in s.
+func CharCounts(s string) map[rune]int {
+	chars := make(map[rune]int)
+	for _, c := range s {
+		chars[c]++
+	}
+	return chars
+}
+
+// SortString sorts a string lexicographically.
+func SortString(s string) string {
+	b := []byte(s)
+	sort.Slice(b, func(i int, j int) bool {
+		return b[i] < b[j]
+	})
+	return string(b)
+}
+
+// DiffIndex returns the index at which s1 and s2 diverge.
+func DiffIndex(s1, s2 string) int {
+	i := 0
+	for i < len(s1) && i < len(s2) {
+		if s1[i] != s2[i] {
+			return i
+		}
+		i++
+	}
+	return i
 }
 
 // Split is a passthrough for strings.Split.
