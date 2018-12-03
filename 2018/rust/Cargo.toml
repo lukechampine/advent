@@ -10,3 +10,4 @@ bench = false
 rust-crypto = "0.2.36"
 aoc-runner = "0.1.0"
 aoc-runner-derive = "0.1.0"
+scan_fmt = "0.1.3"

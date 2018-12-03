@@ -15,7 +15,7 @@ func Abs(x int) int {
 	return x
 }
 
-// Min returns the greater of x and y.
+// Max returns the greater of x and y.
 func Max(x, y int) int {
 	if x > y {
 		return x
@@ -72,7 +72,7 @@ func And(preds ...bool) bool {
 	return true
 }
 
-// And returns true if any of its arguments are true.
+// Or returns true if any of its arguments are true.
 func Or(preds ...bool) bool {
 	for _, pred := range preds {
 		if pred {
@@ -84,7 +84,7 @@ func Or(preds ...bool) bool {
 
 // Lines splits a string by newlines.
 func Lines(input string) []string {
-	return strings.Split(input, "\n")
+	return strings.Split(strings.TrimSpace(input), "\n")
 }
 
 // Itoa is a passthrough for strconv.Itoa
