@@ -236,6 +236,39 @@ func (g Grid) Valid(p Pos) bool {
 	return 0 <= p.X && p.X <= g.X && 0 <= p.Y && p.Y <= g.Y
 }
 
+type LightBoard struct {
+	board [][]bool
+}
+
+func (l *LightBoard) Set(x, y int, lit bool) {
+	l.board[y][x] = lit
+}
+
+func (l *LightBoard) Get(x, y int) bool {
+	return l.board[y][x]
+}
+
+func (l *LightBoard) Print() {
+	for y := range l.board {
+		for x := range l.board[y] {
+			if l.board[y][x] {
+				fmt.Print("#")
+			} else {
+				fmt.Print(".")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func NewLightBoard(x, y int) *LightBoard {
+	board := make([][]bool, y)
+	for i := range board {
+		board[i] = make([]bool, x)
+	}
+	return &LightBoard{board}
+}
+
 type Maze struct {
 	Grid
 	IsWall func(Pos) bool
