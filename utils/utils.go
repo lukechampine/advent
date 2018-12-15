@@ -172,6 +172,11 @@ func Sscanf(str, format string, args ...interface{}) {
 	}
 }
 
+// Print is a passthrough for fmt.Print.
+func Print(args ...interface{}) {
+	fmt.Print(args...)
+}
+
 // Println is a passthrough for fmt.Println.
 func Println(args ...interface{}) {
 	fmt.Println(args...)
@@ -335,6 +340,15 @@ const (
 	Left
 )
 
+func (d Dir) String() string {
+	return map[Dir]string{
+		Up:    "Up",
+		Down:  "Down",
+		Left:  "Left",
+		Right: "Right",
+	}[d]
+}
+
 func (d Dir) SpinRight(n int) Dir {
 	return (((d + Dir(n)) % 4) + 4) % 4
 }
@@ -346,6 +360,10 @@ func (d Dir) TurnLeft() Dir   { return d.SpinRight(-1) }
 type Agent struct {
 	Pos
 	Dir
+}
+
+func (a Agent) String() string {
+	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Dir)
 }
 
 func (a *Agent) MoveForward(n int) {
