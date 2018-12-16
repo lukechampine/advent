@@ -284,7 +284,7 @@ func (m Maze) Valid(p Pos) bool {
 }
 
 func (m Maze) ValidMoves(p Pos) []Pos {
-	var valid []Pos
+	valid := make([]Pos, 0, 4)
 	for _, move := range p.Moves() {
 		if m.Valid(move) {
 			valid = append(valid, move)
@@ -294,7 +294,7 @@ func (m Maze) ValidMoves(p Pos) []Pos {
 }
 
 func (p Pos) ValidMoves(g Grid) []Pos {
-	var valid []Pos
+	valid := make([]Pos, 0, 4)
 	for _, m := range p.Moves() {
 		if g.Valid(m) {
 			valid = append(valid, m)
@@ -314,7 +314,7 @@ func (p Pos) ValidNumpad(g Grid) []Pos {
 }
 
 func (m Maze) DistancesFrom(p Pos) map[Pos]int {
-	dist := make(map[Pos]int)
+	dist := make(map[Pos]int, m.X*m.Y)
 	m.recdistances(dist, 0, p)
 	return dist
 }
@@ -322,13 +322,94 @@ func (m Maze) DistancesFrom(p Pos) map[Pos]int {
 func (m Maze) recdistances(distances map[Pos]int, dist int, cur Pos) {
 	distances[cur] = dist
 
-	for _, p := range m.ValidMoves(cur) {
-		if d, ok := distances[p]; ok && d <= dist+1 {
-			// already saw this position, and took fewer steps to reach it
+	if p := (Pos{cur.X, cur.Y - 1}); m.Valid(p) {
+		if d, ok := distances[p]; !ok || d > dist+1 {
+			m.recdistances(distances, dist+1, p)
+		}
+	}
+	if p := (Pos{cur.X, cur.Y + 1}); m.Valid(p) {
+		if d, ok := distances[p]; !ok || d > dist+1 {
+			m.recdistances(distances, dist+1, p)
+		}
+	}
+	if p := (Pos{cur.X - 1, cur.Y}); m.Valid(p) {
+		if d, ok := distances[p]; !ok || d > dist+1 {
+			m.recdistances(distances, dist+1, p)
+		}
+	}
+	if p := (Pos{cur.X + 1, cur.Y}); m.Valid(p) {
+		if d, ok := distances[p]; !ok || d > dist+1 {
+			m.recdistances(distances, dist+1, p)
+		}
+	}
+}
+
+// SelectClosest returns the positions closest to 'to' among the supplied
+// options. If multiple options have the same distance, they are returned in
+// unspecified order.
+func (m Maze) SelectClosest(options []Pos, to Pos) []Pos {
+	// first check that we're not already on an option
+	for _, o := range options {
+		if o == to {
+			return []Pos{to}
+		}
+	}
+
+	// BFS using a queue
+	type entry struct {
+		Pos
+		dist int
+	}
+	queue := make([]entry, 0, 100)
+	if p := (Pos{to.X, to.Y - 1}); m.Valid(p) {
+		queue = append(queue, entry{p, 1})
+	}
+	if p := (Pos{to.X, to.Y + 1}); m.Valid(p) {
+		queue = append(queue, entry{p, 1})
+	}
+	if p := (Pos{to.X - 1, to.Y}); m.Valid(p) {
+		queue = append(queue, entry{p, 1})
+	}
+	if p := (Pos{to.X + 1, to.Y}); m.Valid(p) {
+		queue = append(queue, entry{p, 1})
+	}
+	seen := make(map[Pos]struct{}, 1000)
+	closest := make([]Pos, 0, 10)
+	var limit int = 1e9
+outer:
+	for len(queue) > 0 {
+		e := queue[0]
+		copy(queue, queue[1:])
+		queue = queue[:len(queue)-1]
+		if _, ok := seen[e.Pos]; ok {
 			continue
 		}
-		m.recdistances(distances, dist+1, p)
+		seen[e.Pos] = struct{}{}
+		if e.dist > limit {
+			continue
+		}
+		for _, o := range options {
+			if o == e.Pos {
+				closest = append(closest, e.Pos)
+				limit = e.dist
+				continue outer
+			}
+		}
+
+		if p := (Pos{e.X, e.Y - 1}); m.Valid(p) {
+			queue = append(queue, entry{p, e.dist + 1})
+		}
+		if p := (Pos{e.X, e.Y + 1}); m.Valid(p) {
+			queue = append(queue, entry{p, e.dist + 1})
+		}
+		if p := (Pos{e.X - 1, e.Y}); m.Valid(p) {
+			queue = append(queue, entry{p, e.dist + 1})
+		}
+		if p := (Pos{e.X + 1, e.Y}); m.Valid(p) {
+			queue = append(queue, entry{p, e.dist + 1})
+		}
 	}
+	return closest
 }
 
 type Dir int
