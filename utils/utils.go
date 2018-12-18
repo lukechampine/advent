@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strconv"
@@ -482,4 +483,21 @@ func NewAgent(x, y int, d Dir) Agent {
 		Pos: Pos{x, y},
 		Dir: d,
 	}
+}
+
+func PrintGrid(grid [][]byte) {
+	grid2 := make([][]byte, len(grid))
+	for i := range grid2 {
+		grid2[i] = append([]byte(nil), grid[i]...)
+	}
+	fmt.Println(string(bytes.Join(grid2, []byte("\n"))))
+}
+
+func CountGrid(grid [][]byte, c byte) int {
+	sep := []byte{c}
+	var sum int
+	for y := range grid {
+		sum += bytes.Count(grid[y], sep)
+	}
+	return sum
 }
