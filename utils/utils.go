@@ -439,6 +439,34 @@ func (d Dir) TurnRight() Dir  { return d.SpinRight(1) }
 func (d Dir) TurnAround() Dir { return d.SpinRight(2) }
 func (d Dir) TurnLeft() Dir   { return d.SpinRight(-1) }
 
+func DirFromNEWS(c byte) Dir {
+	switch c {
+	case 'N':
+		return Up
+	case 'E':
+		return Right
+	case 'W':
+		return Left
+	case 'S':
+		return Down
+	}
+	panic("invalid NEWS")
+}
+
+func (p Pos) Move(d Dir, n int) Pos {
+	switch d {
+	case Up:
+		p.Y += n
+	case Right:
+		p.X += n
+	case Down:
+		p.Y -= n
+	case Left:
+		p.X -= n
+	}
+	return p
+}
+
 type Agent struct {
 	Pos
 	Dir
