@@ -1,12 +1,26 @@
+// Package utils provides helper types and functions for solving Advent of Code
+// challenges.
 package utils
 
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 )
+
+// ReadInput returns the contents of filename as a string.
+func ReadInput(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
 
 // Abs returns the absolute value of x.
 func Abs(x int) int {
@@ -63,6 +77,19 @@ func MinimumIndex(n int, fn func(int) int) int {
 	return mini
 }
 
+// MinimumIndex returns the integer in [0,n) that produces the smallest value
+// of fn.
+func MaximumIndex(n int, fn func(int) int) int {
+	max := ^int(^uint(0) >> 1) // smallest possible integer
+	maxi := -1
+	for i := 0; i < n; i++ {
+		if f := fn(i); f > max {
+			max, maxi = f, i
+		}
+	}
+	return maxi
+}
+
 // And returns true if all of its arguments are true.
 func And(preds ...bool) bool {
 	for _, pred := range preds {
@@ -81,6 +108,36 @@ func Or(preds ...bool) bool {
 		}
 	}
 	return false
+}
+
+// Any returns true if fn returns true for any value in [0..n).
+func Any(n int, fn func(i int) bool) bool {
+	for i := 0; i < n; i++ {
+		if fn(i) {
+			return true
+		}
+	}
+	return false
+}
+
+// All returns true if fn returns true for all values in [0..n).
+func All(n int, fn func(i int) bool) bool {
+	for i := 0; i < n; i++ {
+		if !fn(i) {
+			return false
+		}
+	}
+	return true
+}
+
+// Count returns the number of values in [0..n) for which fn returns true.
+func Count(n int, fn func(i int) bool) (c int) {
+	for i := 0; i < n; i++ {
+		if fn(i) {
+			c++
+		}
+	}
+	return
 }
 
 // Lines splits a string by newlines.
@@ -528,4 +585,113 @@ func CountGrid(grid [][]byte, c byte) int {
 		sum += bytes.Count(grid[y], sep)
 	}
 	return sum
+}
+
+type UnionFinder struct {
+	parent map[int]int
+	rank   map[int]int
+}
+
+func NewUnionFinder() UnionFinder {
+	return UnionFinder{
+		parent: make(map[int]int),
+		rank:   make(map[int]int),
+	}
+}
+
+func (u UnionFinder) hasParent(p int) bool {
+	_, ok := u.parent[p]
+	return ok
+}
+
+func (u UnionFinder) Find(p int) int {
+	root := p
+
+	// Find the root of the element by following parent pointers until an element
+	// without a parent is found.
+	for u.hasParent(root) {
+		root = u.parent[root]
+	}
+
+	// Compress the connections between the element and the located root by making
+	// every element found on the way to root point directly to it.
+	for p != root {
+		p, u.parent[p] = u.parent[p], root
+	}
+
+	return root
+}
+
+func (u UnionFinder) Join(p int, q int) {
+	pr := u.Find(p)
+	qr := u.Find(q)
+
+	if pr == qr {
+		return
+	}
+
+	// Merge the lower-ranking component into the larger-ranking component.
+	if u.rank[pr] < u.rank[qr] {
+		u.parent[pr] = qr
+	} else {
+		u.parent[qr] = pr
+	}
+
+	// Increase the rank of the merged component if joining two components that
+	// have the same rank.
+	if u.rank[pr] == u.rank[qr] {
+		u.rank[pr]++
+	}
+}
+
+func (u UnionFinder) Connected(p int, q int) bool { return u.Find(p) == u.Find(q) }
+
+func ExtractInts(s string) []int {
+	fs := strings.FieldsFunc(s, func(r rune) bool {
+		return !unicode.IsDigit(r)
+	})
+	ints := make([]int, 0, len(fs))
+	for _, w := range fs {
+		i, err := strconv.Atoi(w)
+		if err == nil {
+			ints = append(ints, i)
+		}
+	}
+	return ints
+}
+
+func Parse(obj interface{}, format string, input string) {
+	typ := reflect.TypeOf(obj)
+	if typ.Kind() != reflect.Ptr {
+		panic("not a pointer!")
+	}
+	switch typ.Elem().Kind() {
+	case reflect.Slice:
+		if typ.Elem().Elem().Kind() != reflect.Struct {
+			panic("not a pointer to a slice of structs!")
+		}
+		parseStructSlice(reflect.ValueOf(obj).Elem(), format, input)
+
+	case reflect.Struct:
+		parseStruct(reflect.ValueOf(obj).Elem(), format, input)
+
+	default:
+		panic("not a pointer to a struct or slice of structs!")
+	}
+}
+
+func parseStructSlice(obj reflect.Value, format, input string) {
+	lines := Lines(input)
+	obj.Set(reflect.MakeSlice(obj.Type(), len(lines), len(lines)))
+	for i, line := range lines {
+		parseStruct(obj.Index(i), format, line)
+	}
+}
+
+func parseStruct(obj reflect.Value, format string, input string) {
+	var args []interface{}
+	for i := 0; i < obj.NumField(); i++ {
+		args = append(args, obj.Field(i).Addr().Interface())
+	}
+	Sscanf(input, format, args...)
 }
