@@ -510,6 +510,20 @@ func DirFromNEWS(c byte) Dir {
 	panic("invalid NEWS")
 }
 
+func DirFromUDLR(c byte) Dir {
+	switch c {
+	case 'U':
+		return Up
+	case 'D':
+		return Down
+	case 'L':
+		return Left
+	case 'R':
+		return Right
+	}
+	panic("invalid UDLR")
+}
+
 func (p Pos) Move(d Dir, n int) Pos {
 	switch d {
 	case Up:
@@ -520,6 +534,14 @@ func (p Pos) Move(d Dir, n int) Pos {
 		p.Y -= n
 	case Left:
 		p.X -= n
+	}
+	return p
+}
+
+func (p Pos) Tread(d Dir, n int, fn func(Pos)) Pos {
+	for i := 0; i < n; i++ {
+		p = p.Move(d, 1)
+		fn(p)
 	}
 	return p
 }
