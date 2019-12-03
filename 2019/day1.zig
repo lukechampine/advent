@@ -1,51 +1,32 @@
 const std = @import("std");
+const utils = @import("utils.zig");
 
-fn IntIterator(comptime T: type) type {
-    return struct {
-        const Self = @This();
-        it: std.mem.SplitIterator,
-
-        fn next(self: *Self) ?T {
-            const untrimmed = self.it.next() orelse return null;
-            const trimmed = std.mem.trim(u8, untrimmed, " ");
-            if (trimmed.len == 0) return null;
-            const x = std.fmt.parseInt(T, trimmed, 10) catch unreachable;
-            return x;
-        }
-
-        fn new(in: []const u8) Self {
-            return Self{
-                .it = std.mem.separate(in, "\n"),
-            };
-        }
-    };
-}
-
-fn calcFuel(m: u64) u64 {
+fn calcFuel(m: usize) usize {
     var mm = m / 3;
-    if (mm <= 2) {
-        return 0;
-    }
-    mm -= 2;
-    return mm + calcFuel(mm);
+    return mm - std.math.min(mm, 2);
 }
 
-pub fn main() !void {
-    const input = try std.io.readFileAlloc(std.heap.direct_allocator, "day1_input.txt");
+fn calcFuelRec(m: usize) usize {
+    var mm = calcFuel(m);
+    return if (mm == 0) 0 else mm + calcFuelRec(mm);
+}
+
+pub fn main() void {
+    const input = utils.readFile("day1_input.txt");
 
     // part 1
-    var it = IntIterator(u64).new(input);
-    var sum: u64 = 0;
-    while (it.next()) |m| {
-        sum += (m / 3) - 2;
-    }
-    std.debug.warn("{}\n", sum);
-
-    // part 2
-    it = IntIterator(u64).new(input);
-    sum = 0;
+    var it = utils.IntIterator(usize).new(input, "\n");
+    var sum: usize = 0;
     while (it.next()) |m| {
         sum += calcFuel(m);
     }
-    std.debug.warn("{}\n", sum);
+    utils.println(sum);
+
+    // part 2
+    it = utils.IntIterator(usize).new(input, "\n");
+    sum = 0;
+    while (it.next()) |m| {
+        sum += calcFuelRec(m);
+    }
+    utils.println(sum);
 }
