@@ -57,8 +57,7 @@ pub fn parseInt(comptime T: type, str: []const u8) T {
     return std.fmt.parseInt(T, str, 10) catch unreachable;
 }
 
-pub fn formatInt(i: var) []const u8 {
-    var buf = alloc(u8, 100);
+pub fn formatInt(buf: []u8, i: var) []const u8 {
     return buf[0..std.fmt.formatIntBuf(buf, i, 10, false, std.fmt.FormatOptions{})];
 }
 
