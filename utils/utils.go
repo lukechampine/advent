@@ -140,6 +140,9 @@ func Count(n int, fn func(i int) bool) (c int) {
 	return
 }
 
+func IntToBool(i int) bool { return i != 0 }
+func BoolToInt(b bool) int { return map[bool]int{false: 0, true: 1}[b] }
+
 // Lines splits a string by newlines.
 func Lines(input string) []string {
 	return strings.Split(strings.TrimSpace(input), "\n")
@@ -670,7 +673,7 @@ func (u UnionFinder) Connected(p int, q int) bool { return u.Find(p) == u.Find(q
 
 func ExtractInts(s string) []int {
 	fs := strings.FieldsFunc(s, func(r rune) bool {
-		return !unicode.IsDigit(r)
+		return !unicode.IsDigit(r) && r != '-'
 	})
 	ints := make([]int, 0, len(fs))
 	for _, w := range fs {
