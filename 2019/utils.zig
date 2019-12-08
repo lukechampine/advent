@@ -18,6 +18,13 @@ pub fn dup(comptime T: type, orig: []T) []T {
     return d;
 }
 
+pub fn append(comptime T: type, orig: []T, e: T) []T {
+    var d = alloc(T, orig.len + 1);
+    std.mem.copy(T, d, orig);
+    d[orig.len] = e;
+    return d;
+}
+
 pub fn abs(x: var) @typeOf(x) {
     return std.math.absInt(x) catch unreachable;
 }
