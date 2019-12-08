@@ -19,7 +19,7 @@ func ReadInput(filename string) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(data)
+	return string(bytes.TrimSpace(data))
 }
 
 // Abs returns the absolute value of x.
@@ -140,6 +140,14 @@ func Count(n int, fn func(i int) bool) (c int) {
 	return
 }
 
+// Sum returns the sum of f(i) for i in [0..n).
+func Sum(n int, fn func(i int) int) (c int) {
+	for i := 0; i < n; i++ {
+		c += fn(i)
+	}
+	return
+}
+
 func IntToBool(i int) bool { return i != 0 }
 func BoolToInt(b bool) int { return map[bool]int{false: 0, true: 1}[b] }
 
@@ -183,11 +191,7 @@ func IntList(s string) []int {
 
 // IntSum returns the sum of a list of ints.
 func IntSum(xs []int) int {
-	sum := 0
-	for _, x := range xs {
-		sum += x
-	}
-	return sum
+	return Sum(len(xs), func(i int) int { return xs[i] })
 }
 
 // CharCounts returns the count of each character in s.
@@ -604,12 +608,9 @@ func PrintGrid(grid [][]byte) {
 }
 
 func CountGrid(grid [][]byte, c byte) int {
-	sep := []byte{c}
-	var sum int
-	for y := range grid {
-		sum += bytes.Count(grid[y], sep)
-	}
-	return sum
+	return Sum(len(grid), func(i int) int {
+		return bytes.Count(grid[i], []byte{c})
+	})
 }
 
 type UnionFinder struct {
@@ -719,4 +720,43 @@ func parseStruct(obj reflect.Value, format string, input string) {
 		args = append(args, obj.Field(i).Addr().Interface())
 	}
 	Sscanf(input, format, args...)
+}
+
+func Wrap(xs []int, n int) [][]int {
+	if len(xs)%n != 0 {
+		panic("untidy wrapping")
+	}
+	lines := make([][]int, len(xs)/n)
+	for i := range lines {
+		lines[i] = xs[i*n:][:n]
+	}
+	return lines
+}
+
+func WrapString(s string, n int) []string {
+	if len(s)%n != 0 {
+		panic("untidy wrapping")
+	}
+	lines := make([]string, len(s)/n)
+	for i := range lines {
+		lines[i] = s[i*n:][:n]
+	}
+	return lines
+}
+
+func Replace(s string, oldnew ...string) string {
+	return strings.NewReplacer(oldnew...).Replace(s)
+}
+
+func ByteGrid(x, y int, init ...byte) [][]byte {
+	g := make([][]byte, y)
+	for i := range g {
+		g[i] = make([]byte, x)
+		if len(init) != 0 {
+			for j := range g[i] {
+				g[i][j] = init[0]
+			}
+		}
+	}
+	return g
 }

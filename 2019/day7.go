@@ -29,6 +29,7 @@ func newMachine(prog []int) machine {
 }
 
 func (m *machine) run(input int) (output int) {
+	m.state = stateRunning
 	inputUsed := false
 	p := m.prog
 	for m.i < len(p) {
@@ -90,21 +91,15 @@ func (m *machine) run(input int) (output int) {
 	panic("unreachable")
 }
 
-func runMachine(p []int, inputs []int) (output int) {
-	m := newMachine(p)
-	for _, in := range inputs {
-		output = m.run(in)
-	}
-	return
-}
-
 func main() {
 	// part 1
 	seqs := utils.Perms(5)
 	utils.Println(utils.Maximum(len(seqs), func(i int) int {
 		out := 0
 		for _, s := range seqs[i] {
-			out = runMachine(prog, []int{s, out})
+			m := newMachine(prog)
+			m.run(s)
+			out = m.run(out)
 		}
 		return out
 	}))
