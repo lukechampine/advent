@@ -106,3 +106,29 @@ pub fn IntIterator(comptime T: type) type {
         }
     };
 }
+
+pub fn perms(comptime T: type, n: T) [][]T {
+    if (n == 1) {
+        var ps = alloc([]T, 1);
+        ps[0] = alloc(T, 1);
+        ps[0][0] = 0;
+        return ps;
+    }
+    var ps = perms(T, n - 1);
+
+    // interleave
+    var leaved = alloc([]T, ps.len * @intCast(usize, n));
+    var li: usize = 0;
+    for (ps) |perm| {
+        var i: usize = 0;
+        while (i <= perm.len) : (i += 1) {
+            var withN = alloc(T, perm.len + 1);
+            std.mem.copy(T, withN[0..i], perm[0..i]);
+            withN[i] = n - 1;
+            std.mem.copy(T, withN[i + 1 ..], perm[i..]);
+            leaved[li] = withN;
+            li += 1;
+        }
+    }
+    return leaved;
+}

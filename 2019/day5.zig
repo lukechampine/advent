@@ -57,12 +57,10 @@ fn runMachine(prog: []i32, input: i32) i32 {
 
 pub fn main() void {
     const input = utils.readFile("day5_input.txt");
-    var prog = utils.alloc(i32, utils.count(input, ","));
-    var pi: usize = 0;
+    var prog = utils.alloc(i32, utils.count(u8, input, ',') + 1);
     var it = std.mem.separate(input, ",");
-    while (it.next()) |d| {
-        prog[pi] = utils.parseInt(i32, d);
-        pi += 1;
+    for (prog) |_, i| {
+        prog[i] = utils.parseInt(i32, it.next() orelse unreachable);
     }
 
     // part 1

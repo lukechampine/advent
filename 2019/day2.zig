@@ -22,12 +22,10 @@ fn runMachine(prog: []u32, noun: u32, verb: u32) u32 {
 
 pub fn main() void {
     const input = utils.readFile("day2_input.txt");
-    var prog = utils.alloc(u32, utils.count(input, ","));
-    var pi: usize = 0;
+    var prog = utils.alloc(u32, utils.count(u8, input, ',') + 1);
     var it = std.mem.separate(input, ",");
-    while (it.next()) |d| {
-        prog[pi] = utils.parseInt(u32, d);
-        pi += 1;
+    for (prog) |_, i| {
+        prog[i] = utils.parseInt(u32, it.next() orelse unreachable);
     }
 
     // part 1
