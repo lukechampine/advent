@@ -33,11 +33,12 @@ pub fn makeMap(comptime K: type, comptime V: type) std.AutoHashMap(K, V) {
     return std.AutoHashMap(K, V).init(std.heap.direct_allocator);
 }
 
-pub fn count(str: []const u8, sep: []const u8) usize {
-    var it = std.mem.separate(str, sep);
+pub fn count(comptime T: type, in: []const T, e: T) usize {
     var c: usize = 0;
-    while (it.next()) |_| {
-        c += 1;
+    for (in) |x| {
+        if (x == e) {
+            c += 1;
+        }
     }
     return c;
 }
@@ -47,17 +48,25 @@ pub fn readFile(path: []const u8) []const u8 {
     return std.mem.trim(u8, data, "\n");
 }
 
-pub fn readFileLines(path: []const u8) [][]const u8 {
-    const data = readFile(path);
-    var num_lines: usize = count(data, "\n");
-    var lines = alloc([]const u8, num_lines);
-    var it = std.mem.separate(data, "\n");
-    num_lines = 0;
-    while (it.next()) |line| {
-        lines[num_lines] = line;
-        num_lines += 1;
+pub fn splitByte(data: []const u8, b: u8) [][]const u8 {
+    var sep = [_]u8{b};
+    var groups = alloc([]const u8, count(u8, data, b) + 1);
+    var it = std.mem.separate(data, sep[0..]);
+    for (groups) |_, i| {
+        groups[i] = it.next() orelse unreachable;
     }
-    return lines;
+    return groups;
+}
+
+pub fn readFileLines(path: []const u8) [][]const u8 {
+    return splitByte(readFile(path), '\n');
+}
+
+pub fn replace(comptime T: type, in: []T, old: T, new: T) []T {
+    for (in) |e, i| {
+        if (e == old) in[i] = new;
+    }
+    return in;
 }
 
 pub fn parseInt(comptime T: type, str: []const u8) T {
