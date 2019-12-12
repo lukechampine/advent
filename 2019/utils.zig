@@ -25,8 +25,27 @@ pub fn append(comptime T: type, orig: []T, e: T) []T {
     return d;
 }
 
+pub fn deleteSlice(comptime T: type, orig: []T, i: usize) []T {
+    std.mem.copy(T, orig[i..], orig[i + 1 ..]);
+    return orig[0 .. orig.len - 1];
+}
+
 pub fn abs(x: var) @typeOf(x) {
-    return std.math.absInt(x) catch unreachable;
+    if (@typeId(@typeOf(x)) == std.builtin.TypeId.ComptimeInt) {
+        return if (x > 0) x else -x;
+    }
+    return if (!@typeOf(x).is_signed) x else std.math.absInt(x) catch unreachable;
+}
+
+pub fn gcd(a: var, b: @typeOf(a)) @typeOf(a) {
+    var aa = abs(a);
+    var ab = abs(b);
+    while (ab != 0) {
+        var t = aa;
+        aa = ab;
+        ab = @rem(t, ab);
+    }
+    return aa;
 }
 
 pub fn makeMap(comptime K: type, comptime V: type) std.AutoHashMap(K, V) {
@@ -89,6 +108,10 @@ pub const Pos = struct {
             'R' => Pos{ .x = p.x + 1, .y = p.y },
             else => unreachable,
         };
+    }
+
+    fn rel(p: Pos, q: Pos) Pos {
+        return Pos{ .x = p.x - q.x, .y = p.y - q.y };
     }
 
     fn manhattan_dist(p: Pos, o: Pos) i32 {
