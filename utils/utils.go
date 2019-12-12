@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"reflect"
 	"sort"
 	"strconv"
@@ -146,6 +147,22 @@ func Sum(n int, fn func(i int) int) (c int) {
 		c += fn(i)
 	}
 	return
+}
+
+func GCD(a, b int) int {
+	a, b = Abs(a), Abs(b)
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+func LCM(nums ...int) int {
+	result := nums[0] * nums[1] / GCD(nums[0], nums[1])
+	for _, i := range nums[2:] {
+		result = LCM(result, i)
+	}
+	return result
 }
 
 func IntToBool(i int) bool { return i != 0 }
@@ -295,6 +312,55 @@ func (p Pos) Numpad() []Pos {
 		{p.X + 1, p.Y - 1},
 		{p.X + 1, p.Y + 0},
 		{p.X + 1, p.Y + 1},
+	}
+}
+
+// StrideTowards "moves" p towards q, taking the smallest "step" that results in
+// integer coordinates.
+func (p Pos) StrideTowards(q Pos) Pos {
+	if q == p {
+		return q
+	}
+	dx, dy := q.X-p.X, q.Y-p.Y
+	gcd := GCD(dx, dy)
+	return Pos{p.X + dx/gcd, p.Y + dy/gcd}
+}
+
+func (p Pos) Rel(q Pos) Pos {
+	return Pos{p.X - q.X, p.Y - q.Y}
+}
+
+func (p Pos) Polar() (rho float64, phi float64) {
+	x, y := float64(p.X), float64(p.Y)
+	return math.Hypot(x, y), math.Atan2(y, x)
+}
+
+func PrintPositions(ps []Pos, empty, full rune) {
+	minX, minY := int(1e9), int(1e9)
+	maxX, maxY := int(-1e9), int(-1e9)
+	for _, p := range ps {
+		minX = Min(minX, p.X)
+		minY = Min(minY, p.Y)
+		maxX = Max(maxX, p.X)
+		maxY = Max(maxY, p.Y)
+	}
+	for i := range ps {
+		ps[i].X -= minX
+		ps[i].Y -= minY
+	}
+	g := make([][]rune, 1+maxY-minY)
+	for y := range g {
+		g[y] = make([]rune, 1+maxX-minX)
+		for x := range g[y] {
+			g[y][x] = empty
+		}
+	}
+	for _, p := range ps {
+		y := len(g) - p.Y - 1 // flip vertically
+		g[y][p.X] = full
+	}
+	for _, row := range g {
+		fmt.Println(string(row))
 	}
 }
 
