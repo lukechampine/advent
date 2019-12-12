@@ -1,5 +1,9 @@
 const std = @import("std");
 
+pub fn print(n: var) void {
+    std.debug.warn("{}", n);
+}
+
 pub fn println(n: var) void {
     std.debug.warn("{}\n", n);
 }
@@ -96,17 +100,54 @@ pub fn formatInt(buf: []u8, i: var) []const u8 {
     return buf[0..std.fmt.formatIntBuf(buf, i, 10, false, std.fmt.FormatOptions{})];
 }
 
+pub const Dir = enum {
+    Up,
+    Down,
+    Left,
+    Right,
+
+    fn turnLeft(d: Dir) Dir {
+        return switch (d) {
+            Dir.Up => Dir.Left,
+            Dir.Down => Dir.Right,
+            Dir.Left => Dir.Down,
+            Dir.Right => Dir.Up,
+        };
+    }
+
+    fn turnRight(d: Dir) Dir {
+        return switch (d) {
+            Dir.Up => Dir.Right,
+            Dir.Down => Dir.Left,
+            Dir.Left => Dir.Up,
+            Dir.Right => Dir.Down,
+        };
+    }
+
+    pub fn fromUDLR(d: u8) Dir {
+        return switch (d) {
+            'U' => Dir.Up,
+            'D' => Dir.Down,
+            'L' => Dir.Left,
+            'R' => Dir.Right,
+            else => unreachable,
+        };
+    }
+};
+
 pub const Pos = struct {
     x: i32 = 0,
     y: i32 = 0,
 
-    fn move(p: Pos, dir: u8) Pos {
+    fn move(p: Pos, dir: Dir) Pos {
+        return p.moveN(dir, 1);
+    }
+    fn moveN(p: Pos, dir: Dir, steps: i32) Pos {
         return switch (dir) {
-            'U' => Pos{ .x = p.x, .y = p.y + 1 },
-            'D' => Pos{ .x = p.x, .y = p.y - 1 },
-            'L' => Pos{ .x = p.x - 1, .y = p.y },
-            'R' => Pos{ .x = p.x + 1, .y = p.y },
-            else => unreachable,
+            Dir.Up => Pos{ .x = p.x, .y = p.y + steps },
+            Dir.Down => Pos{ .x = p.x, .y = p.y - steps },
+            Dir.Left => Pos{ .x = p.x - steps, .y = p.y },
+            Dir.Right => Pos{ .x = p.x + steps, .y = p.y },
         };
     }
 
@@ -116,6 +157,28 @@ pub const Pos = struct {
 
     fn manhattan_dist(p: Pos, o: Pos) i32 {
         return abs(p.x - o.x) + abs(p.y - o.y);
+    }
+};
+
+pub const Actor = struct {
+    const Self = @This();
+    pos: Pos = undefined,
+    dir: Dir = undefined,
+
+    fn moveForward(s: *Self, steps: i32) void {
+        s.pos = s.pos.moveN(s.dir, steps);
+    }
+
+    fn turnLeft(s: *Self) void {
+        s.dir = s.dir.turnLeft();
+    }
+
+    fn turnRight(s: *Self) void {
+        s.dir = s.dir.turnRight();
+    }
+
+    pub fn init(p: Pos, d: Dir) Self {
+        return Self{ .pos = p, .dir = d };
     }
 };
 
