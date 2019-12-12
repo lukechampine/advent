@@ -42,7 +42,7 @@ fn runMachine(prog: []i32, input: i32) i32 {
             6 => i = if (args.get(1) == 0) @intCast(usize, args.get(2)) else i + 3,
             // I/O
             3 => p[args.imm(1)] = input,
-            4 => if (args.get(1) != 0) return args.get(1),
+            4 => return args.get(1),
             else => unreachable,
         }
         i += switch (op) {

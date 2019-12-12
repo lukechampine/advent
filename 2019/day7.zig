@@ -52,10 +52,8 @@ const machine = struct {
                 },
                 4 => {
                     var out = args.get(1);
-                    if (out != 0) {
-                        s.i += 2;
-                        return out;
-                    }
+                    s.i += 2;
+                    return out;
                 },
                 // halt
                 99 => return null,
@@ -72,8 +70,7 @@ const machine = struct {
     }
 
     fn init(p: []i32) Self {
-        var s = Self{ .p = utils.dup(i32, p) };
-        return s;
+        return Self{ .p = utils.dup(i32, p) };
     }
 };
 

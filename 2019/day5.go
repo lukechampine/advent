@@ -29,9 +29,7 @@ func runMachine(p []int, input int) (output int) {
 			*getArg(1) = input
 			i += 2
 		case 4:
-			if x := *getArg(1); x != 0 {
-				return x
-			}
+			return *getArg(1)
 			i += 2
 		case 5:
 			if *getArg(1) != 0 {

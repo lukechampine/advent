@@ -59,10 +59,8 @@ func (m *machine) run(input int) (output int) {
 		case 4:
 			x := *getArg(1)
 			m.i += 2
-			if x != 0 {
-				m.state = stateEmittedOutput
-				return x
-			}
+			m.state = stateEmittedOutput
+			return x
 		case 5:
 			if *getArg(1) != 0 {
 				m.i = *getArg(2)

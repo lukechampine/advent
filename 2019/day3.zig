@@ -10,7 +10,7 @@ pub fn main() !void {
     while (it.next()) |d| {
         var n = utils.parseInt(i32, d[1..]);
         while (n > 0) : (n -= 1) {
-            p = p.move(d[0]);
+            p = p.move(utils.Dir.fromUDLR(d[0]));
             steps += 1;
             _ = try map.put(p, steps);
         }
@@ -24,7 +24,7 @@ pub fn main() !void {
     while (it.next()) |d| {
         var n = utils.parseInt(i32, d[1..]);
         while (n > 0) : (n -= 1) {
-            p = p.move(d[0]);
+            p = p.move(utils.Dir.fromUDLR(d[0]));
             steps += 1;
             if (map.getValue(p)) |other_steps| {
                 bestDist = std.math.min(bestDist, p.manhattan_dist(utils.Pos{}));

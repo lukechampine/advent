@@ -55,10 +55,8 @@ const machine = struct {
                 },
                 4 => {
                     var out = args.get(1).*;
-                    if (out != 0) {
-                        s.i += 2;
-                        return out;
-                    }
+                    s.i += 2;
+                    return out;
                 },
                 // rel
                 9 => s.rel += args.get(1).*,
