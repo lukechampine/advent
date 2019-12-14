@@ -52,6 +52,10 @@ pub fn gcd(a: var, b: @typeOf(a)) @typeOf(a) {
     return aa;
 }
 
+pub fn lcm(a: var, b: @typeOf(a)) @typeOf(a) {
+    return @divExact(a * b, gcd(a, b));
+}
+
 pub fn makeMap(comptime K: type, comptime V: type) std.AutoHashMap(K, V) {
     return std.AutoHashMap(K, V).init(std.heap.direct_allocator);
 }
