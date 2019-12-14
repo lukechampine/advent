@@ -140,13 +140,13 @@ pub const Dir = enum {
 };
 
 pub const Pos = struct {
-    x: i32 = 0,
-    y: i32 = 0,
+    x: i64 = 0,
+    y: i64 = 0,
 
     fn move(p: Pos, dir: Dir) Pos {
         return p.moveN(dir, 1);
     }
-    fn moveN(p: Pos, dir: Dir, steps: i32) Pos {
+    fn moveN(p: Pos, dir: Dir, steps: i64) Pos {
         return switch (dir) {
             Dir.Up => Pos{ .x = p.x, .y = p.y + steps },
             Dir.Down => Pos{ .x = p.x, .y = p.y - steps },
@@ -159,7 +159,7 @@ pub const Pos = struct {
         return Pos{ .x = p.x - q.x, .y = p.y - q.y };
     }
 
-    fn manhattan_dist(p: Pos, o: Pos) i32 {
+    fn manhattan_dist(p: Pos, o: Pos) i64 {
         return abs(p.x - o.x) + abs(p.y - o.y);
     }
 };
@@ -169,7 +169,7 @@ pub const Actor = struct {
     pos: Pos = undefined,
     dir: Dir = undefined,
 
-    fn moveForward(s: *Self, steps: i32) void {
+    fn moveForward(s: *Self, steps: i64) void {
         s.pos = s.pos.moveN(s.dir, steps);
     }
 
@@ -230,4 +230,12 @@ pub fn perms(comptime T: type, n: T) [][]T {
         }
     }
     return leaved;
+}
+
+pub fn sign(comptime T: type, v: T) T {
+    return switch (v) {
+        1...std.math.maxInt(T) => 1,
+        0 => 0,
+        std.math.minInt(T)...-1 => -1,
+    };
 }
