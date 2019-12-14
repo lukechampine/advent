@@ -60,6 +60,10 @@ pub fn makeMap(comptime K: type, comptime V: type) std.AutoHashMap(K, V) {
     return std.AutoHashMap(K, V).init(std.heap.direct_allocator);
 }
 
+pub fn makeStringMap(comptime V: type) std.StringHashMap(V) {
+    return std.StringHashMap(V).init(std.heap.direct_allocator);
+}
+
 pub fn count(comptime T: type, in: []const T, e: T) usize {
     var c: usize = 0;
     for (in) |x| {
