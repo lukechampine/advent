@@ -229,6 +229,22 @@ func SortString(s string) string {
 	return string(b)
 }
 
+func IsLetter(c byte) bool {
+	return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z')
+}
+
+func IsLower(s string) bool {
+	return s == strings.ToLower(s)
+}
+
+func IsUpper(s string) bool {
+	return s == strings.ToUpper(s)
+}
+
+func ContainsByte(s string, b byte) bool {
+	return strings.IndexByte(s, b) >= 0
+}
+
 // DiffIndex returns the index at which s1 and s2 diverge.
 func DiffIndex(s1, s2 string) int {
 	i := 0
@@ -326,6 +342,10 @@ func (p Pos) StrideTowards(q Pos) Pos {
 	return Pos{p.X + dx/gcd, p.Y + dy/gcd}
 }
 
+func (p Pos) Add(x, y int) Pos {
+	return Pos{p.X + x, p.Y + y}
+}
+
 func (p Pos) Rel(q Pos) Pos {
 	return Pos{p.X - q.X, p.Y - q.Y}
 }
@@ -335,22 +355,27 @@ func (p Pos) Polar() (rho float64, phi float64) {
 	return math.Hypot(x, y), math.Atan2(y, x)
 }
 
-func PrintPositions(ps []Pos, empty, full rune) {
-	minX, minY := int(1e9), int(1e9)
-	maxX, maxY := int(-1e9), int(-1e9)
+func BoundingBox(ps []Pos) (min, max Pos) {
+	min.X, min.Y = int(1e9), int(1e9)
+	max.X, max.Y = int(-1e9), int(-1e9)
 	for _, p := range ps {
-		minX = Min(minX, p.X)
-		minY = Min(minY, p.Y)
-		maxX = Max(maxX, p.X)
-		maxY = Max(maxY, p.Y)
+		min.X = Min(min.X, p.X)
+		min.Y = Min(min.Y, p.Y)
+		max.X = Max(max.X, p.X)
+		max.Y = Max(max.Y, p.Y)
 	}
+	return
+}
+
+func PrintPositions(ps []Pos, empty, full rune) {
+	min, max := BoundingBox(ps)
 	for i := range ps {
-		ps[i].X -= minX
-		ps[i].Y -= minY
+		ps[i].X -= min.X
+		ps[i].Y -= min.Y
 	}
-	g := make([][]rune, 1+maxY-minY)
+	g := make([][]rune, 1+max.Y-min.Y)
 	for y := range g {
-		g[y] = make([]rune, 1+maxX-minX)
+		g[y] = make([]rune, 1+max.X-min.X)
 		for x := range g[y] {
 			g[y][x] = empty
 		}
@@ -405,6 +430,17 @@ func NewLightBoard(x, y int) *LightBoard {
 	return &LightBoard{board}
 }
 
+func Locate(grid [][]byte, c byte) Pos {
+	for y := range grid {
+		for x := range grid[y] {
+			if grid[y][x] == c {
+				return Pos{x, y}
+			}
+		}
+	}
+	panic("not found")
+}
+
 type Maze struct {
 	Grid
 	IsWall func(Pos) bool
@@ -422,6 +458,69 @@ func (m Maze) ValidMoves(p Pos) []Pos {
 		}
 	}
 	return valid
+}
+
+func (m Maze) Minimize(canBacktrack func(Pos) bool) func(Pos) bool {
+	walls := make(map[Pos]struct{})
+	oldFn := m.IsWall
+	m.IsWall = func(p Pos) bool {
+		if _, ok := walls[p]; ok {
+			return true
+		}
+		return oldFn(p)
+	}
+
+	// DFS; first recurse to all valid moves; then, if only one move is
+	// possible, mark current position as a wall
+	seen := make(map[Pos]struct{})
+	var recMinimize func(Pos)
+	recMinimize = func(p Pos) {
+		if _, ok := seen[p]; ok {
+			return
+		}
+		seen[p] = struct{}{}
+		for _, move := range m.ValidMoves(p) {
+			recMinimize(move)
+		}
+		if len(m.ValidMoves(p)) == 1 && canBacktrack(p) {
+			walls[p] = struct{}{}
+		}
+	}
+
+	// starting point doesn't matter; use first non-wall position
+	var start Pos
+outer:
+	for start.X = 0; start.X < m.X; start.X++ {
+		for start.Y = 0; start.Y < m.Y; start.Y++ {
+			if !m.IsWall(start) {
+				break outer
+			}
+		}
+	}
+	recMinimize(start)
+
+	return m.IsWall
+}
+
+func MakeSimpleMaze(grid [][]byte, wall byte) Maze {
+	return Maze{
+		Grid:   Grid{X: len(grid[0]), Y: len(grid)},
+		IsWall: func(p Pos) bool { return grid[p.Y][p.X] == wall },
+	}
+}
+
+func PrintMaze(m Maze, wall byte) {
+	var p Pos
+	for p.Y = 0; p.Y < m.Y; p.Y++ {
+		for p.X = 0; p.X < m.X; p.X++ {
+			if m.IsWall(p) {
+				fmt.Print("#")
+			} else {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func (p Pos) ValidMoves(g Grid) []Pos {
@@ -677,6 +776,14 @@ func CountGrid(grid [][]byte, c byte) int {
 	return Sum(len(grid), func(i int) int {
 		return bytes.Count(grid[i], []byte{c})
 	})
+}
+
+func ToByteGrid(grid []string) [][]byte {
+	b := make([][]byte, len(grid))
+	for i := range b {
+		b[i] = []byte(grid[i])
+	}
+	return b
 }
 
 type UnionFinder struct {
