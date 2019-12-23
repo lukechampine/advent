@@ -2,14 +2,24 @@ package intcode
 
 import "github.com/lukechampine/advent/utils"
 
+func ASCII(s string) []int {
+	ints := make([]int, len(s))
+	for i := range s {
+		ints[i] = int(s[i])
+	}
+	return ints
+}
+
 type Machine struct {
-	prog   []int
-	i      int
-	rel    int
-	Halted bool
+	prog          []int
+	i             int
+	rel           int
+	Halted        bool
+	AwaitingInput bool
 }
 
 func (m *Machine) Run(inputs ...int) (output int) {
+	m.AwaitingInput = false
 	p := m.prog
 	for m.i < len(p) {
 		op, flags := p[m.i]%100, utils.Digits(utils.Itoa(p[m.i]/100))
@@ -32,6 +42,10 @@ func (m *Machine) Run(inputs ...int) (output int) {
 			*getArg(3) = *getArg(1) * *getArg(2)
 			m.i += 4
 		case 3:
+			if len(inputs) == 0 {
+				m.AwaitingInput = true
+				return -1
+			}
 			*getArg(1) = inputs[0]
 			inputs = inputs[1:]
 			m.i += 2
