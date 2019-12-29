@@ -11,7 +11,7 @@ var input = utils.ReadInput("day19_input.txt")
 var prog = utils.ExtractInts(input)
 
 func inBeam(x, y int) bool {
-	return intcode.New(prog).Run(x, y) == 1
+	return intcode.New(prog).Run(x, y)[0] == 1
 }
 
 func fitsSquare(x, y int) bool {
@@ -38,5 +38,4 @@ func main() {
 	})
 	x := rightEdge(y) - 99
 	utils.Println(x*10000 + y)
-	return
 }

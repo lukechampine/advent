@@ -1,13 +1,25 @@
 package intcode
 
-import "github.com/lukechampine/advent/utils"
+import (
+	"strings"
 
-func ASCII(s string) []int {
+	"github.com/lukechampine/advent/utils"
+)
+
+func EncodeASCII(s string) []int {
 	ints := make([]int, len(s))
 	for i := range s {
 		ints[i] = int(s[i])
 	}
 	return ints
+}
+
+func DecodeASCII(ints []int) string {
+	s := make([]byte, len(ints))
+	for i := range s {
+		s[i] = byte(ints[i])
+	}
+	return string(s)
 }
 
 type Machine struct {
@@ -18,7 +30,7 @@ type Machine struct {
 	AwaitingInput bool
 }
 
-func (m *Machine) Run(inputs ...int) (output int) {
+func (m *Machine) Run(inputs ...int) (output []int) {
 	m.AwaitingInput = false
 	p := m.prog
 	for m.i < len(p) {
@@ -44,7 +56,7 @@ func (m *Machine) Run(inputs ...int) (output int) {
 		case 3:
 			if len(inputs) == 0 {
 				m.AwaitingInput = true
-				return -1
+				return
 			}
 			*getArg(1) = inputs[0]
 			inputs = inputs[1:]
@@ -52,7 +64,7 @@ func (m *Machine) Run(inputs ...int) (output int) {
 		case 4:
 			x := *getArg(1)
 			m.i += 2
-			return x
+			output = append(output, x)
 		case 5:
 			if *getArg(1) != 0 {
 				m.i = *getArg(2)
@@ -76,12 +88,17 @@ func (m *Machine) Run(inputs ...int) (output int) {
 			m.i += 2
 		case 99:
 			m.Halted = true
-			return -1
+			return
 		default:
-			m.i++
+			panic("illegal opcode")
 		}
 	}
 	panic("unreachable")
+}
+
+func (m *Machine) RunASCII(input string) (output []int) {
+	input = strings.TrimPrefix(input, "\n") // for more readable `` literals
+	return m.Run(EncodeASCII(input)...)
 }
 
 func New(prog []int) *Machine {

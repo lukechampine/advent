@@ -3,94 +3,12 @@ package main
 import (
 	"math/rand"
 
+	"github.com/lukechampine/advent/2019/intcode"
 	"github.com/lukechampine/advent/utils"
 )
 
 var input = utils.ReadInput("day15_input.txt")
 var prog = utils.ExtractInts(input)
-
-type machineState byte
-
-const (
-	stateRunning machineState = iota
-	stateAwaitingInput
-	stateEmittedOutput
-	stateHalted
-)
-
-type machine struct {
-	prog  []int
-	i     int
-	rel   int
-	state machineState
-}
-
-func newMachine(prog []int) *machine {
-	return &machine{
-		prog: append(prog[:len(prog):len(prog)], make([]int, 30000)...),
-	}
-}
-
-func (m *machine) run(input int) (output int) {
-	m.state = stateRunning
-	p := m.prog
-	for m.i < len(p) {
-		op, flags := p[m.i]%100, utils.Digits(utils.Itoa(p[m.i]/100))
-		getArg := func(n int) *int {
-			imm := p[m.i+n]
-			if len(flags) < n || flags[len(flags)-n] == 0 {
-				return &p[imm]
-			} else if flags[len(flags)-n] == 1 {
-				return &imm
-			} else if flags[len(flags)-n] == 2 {
-				return &p[m.rel+imm]
-			}
-			panic("unreachable")
-		}
-		switch op {
-		case 1:
-			*getArg(3) = *getArg(1) + *getArg(2)
-			m.i += 4
-		case 2:
-			*getArg(3) = *getArg(1) * *getArg(2)
-			m.i += 4
-		case 3:
-			*getArg(1) = input
-			m.i += 2
-		case 4:
-			x := *getArg(1)
-			m.i += 2
-			return x
-		case 5:
-			if *getArg(1) != 0 {
-				m.i = *getArg(2)
-			} else {
-				m.i += 3
-			}
-		case 6:
-			if *getArg(1) == 0 {
-				m.i = *getArg(2)
-			} else {
-				m.i += 3
-			}
-		case 7:
-			*getArg(3) = utils.BoolToInt(*getArg(1) < *getArg(2))
-			m.i += 4
-		case 8:
-			*getArg(3) = utils.BoolToInt(*getArg(1) == *getArg(2))
-			m.i += 4
-		case 9:
-			m.rel += *getArg(1)
-			m.i += 2
-		case 99:
-			m.state = stateHalted
-			return -1
-		default:
-			m.i++
-		}
-	}
-	panic("unreachable")
-}
 
 const gm = 50
 
@@ -100,14 +18,14 @@ var origin = utils.Pos{
 }
 
 type robot struct {
-	m      *machine
+	m      *intcode.Machine
 	p      utils.Pos
 	isWall map[utils.Pos]bool
 }
 
 func newRobot() *robot {
 	return &robot{
-		m:      newMachine(prog),
+		m:      intcode.New(prog),
 		p:      origin,
 		isWall: make(map[utils.Pos]bool),
 	}
@@ -117,7 +35,7 @@ func (r *robot) findOxy() utils.Pos {
 	for {
 		d := rand.Intn(4) + 1
 		np := r.p.Moves()[d-1]
-		switch r.m.run(d) {
+		switch out := r.m.Run(d); out[0] {
 		case 0:
 		case 1:
 			r.p = np
@@ -150,7 +68,7 @@ func (r *robot) exploreFully(avoid utils.Pos) map[utils.Pos]bool {
 			goto retry
 		}
 
-		switch r.m.run(d) {
+		switch out := r.m.Run(d); out[0] {
 		case 0:
 			r.isWall[np] = true
 			delete(toVisit, np)

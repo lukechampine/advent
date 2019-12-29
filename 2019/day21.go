@@ -10,34 +10,19 @@ var prog = utils.ExtractInts(input)
 
 func main() {
 	// part 1
-	m := intcode.New(prog)
-	for !m.AwaitingInput {
-		m.Run()
-	}
 	// D && (!A || !C)
-	script := `
+	out := intcode.New(prog).RunASCII(`
 NOT A J
 NOT C T
 OR T J
 AND D J
 WALK
-`
-	m.Run(intcode.ASCII(script[1:])...)
-	for !m.Halted {
-		out := m.Run()
-		if out > 128 {
-			utils.Println(out)
-		}
-	}
+`)
+	utils.Println(out[len(out)-1])
 
 	// part 2
-	m = intcode.New(prog)
-	for !m.AwaitingInput {
-		m.Run()
-	}
-
 	// D && (!A || (!B && H) || (!C && (E || H)))
-	script = `
+	out = intcode.New(prog).RunASCII(`
 NOT C T
 OR E J
 OR H J
@@ -49,12 +34,6 @@ NOT A T
 OR T J
 AND D J
 RUN
-`
-	m.Run(intcode.ASCII(script[1:])...)
-	for !m.Halted {
-		out := m.Run()
-		if out > 128 {
-			utils.Println(out)
-		}
-	}
+`)
+	utils.Println(out[len(out)-1])
 }
