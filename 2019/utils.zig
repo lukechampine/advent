@@ -166,6 +166,10 @@ pub const Pos = struct {
     fn manhattan_dist(p: Pos, o: Pos) i64 {
         return abs(p.x - o.x) + abs(p.y - o.y);
     }
+
+    pub fn fromStride(i: usize, stride: usize) Pos {
+        return Pos{ .x = @intCast(i64, i % stride), .y = @intCast(i64, i / stride) };
+    }
 };
 
 pub const Actor = struct {
@@ -242,4 +246,118 @@ pub fn sign(comptime T: type, v: T) T {
         0 => 0,
         std.math.minInt(T)...-1 => -1,
     };
+}
+
+const argParser = struct {
+    const Self = @This();
+    p: []i64 = undefined,
+    i: usize = undefined,
+    rel: i64 = undefined,
+    flags: [3]u2 = undefined,
+    fn get(s: Self, n: usize) *i64 {
+        return switch (s.flags[n - 1]) {
+            0 => &s.p[@intCast(usize, s.p[s.i + n])],
+            1 => &s.p[s.i + n],
+            2 => &s.p[@intCast(usize, s.rel + s.p[s.i + n])],
+            else => unreachable,
+        };
+    }
+    fn init(p: []i64, i: usize, rel: i64) Self {
+        var s = Self{ .p = p, .i = i, .rel = rel };
+        for (s.flags) |_, fi| {
+            const exp = std.math.powi(usize, 10, fi + 2) catch unreachable;
+            s.flags[fi] = @intCast(u2, (@intCast(usize, p[i]) / exp) % 10);
+        }
+        return s;
+    }
+};
+
+pub const Machine = struct {
+    const Self = @This();
+    p: []i64 = undefined,
+    i: usize = 0,
+    rel: i64 = 0,
+
+    fn run(s: *Self, input: var) ?[]i64 {
+        var in: []i64 = switch (@typeOf(input)) {
+            []i64 => input,
+            i64, comptime_int => blk: {
+                var b = alloc(i64, 1);
+                b[0] = input;
+                break :blk b;
+            },
+            []u8, []const u8 => blk: {
+                var b = alloc(i64, input.len);
+                for (b) |_, i| {
+                    b[i] = @intCast(i64, input[i]);
+                }
+                break :blk b;
+            },
+            else => {
+                std.debug.warn("{}\n", @typeName(@typeOf(input)));
+                unreachable;
+            },
+        };
+
+        var inputIndex: usize = 0;
+        var output: ?[]i64 = null;
+        while (s.i < s.p.len) {
+            var op = @mod(s.p[s.i], 100);
+            var args = argParser.init(s.p, s.i, s.rel);
+            switch (op) {
+                // stores
+                1 => args.get(3).* = args.get(1).* + args.get(2).*,
+                2 => args.get(3).* = args.get(1).* * args.get(2).*,
+                7 => args.get(3).* = if (args.get(1).* < args.get(2).*) i64(1) else 0,
+                8 => args.get(3).* = if (args.get(1).* == args.get(2).*) i64(1) else 0,
+                // conditional jumps
+                5 => s.i = if (args.get(1).* != 0) @intCast(usize, args.get(2).*) else s.i + 3,
+                6 => s.i = if (args.get(1).* == 0) @intCast(usize, args.get(2).*) else s.i + 3,
+                // I/O
+                3 => {
+                    if (inputIndex == in.len) {
+                        return output;
+                    }
+                    args.get(1).* = in[inputIndex];
+                    inputIndex += 1;
+                },
+                4 => {
+                    var out = args.get(1).*;
+                    if (output) |o| {
+                        output = append(i64, o, out);
+                    } else {
+                        var o = alloc(i64, 1);
+                        o[0] = out;
+                        output = o;
+                    }
+                },
+                // rel
+                9 => s.rel += args.get(1).*,
+                // halt
+                99 => return output,
+                else => unreachable,
+            }
+            s.i += switch (op) {
+                1, 2, 7, 8 => usize(4),
+                5, 6 => 0, // already jumped
+                3, 4, 9 => 2,
+                else => unreachable,
+            };
+        }
+        unreachable;
+    }
+
+    pub fn init(p: []i64) Self {
+        return Self{ .p = dup(i64, p) };
+    }
+};
+
+pub fn loadProgram(file: []const u8) []i64 {
+    const input = readFile(file);
+    var prog = alloc(i64, count(u8, input, ',') + 30000);
+    var it = std.mem.separate(input, ",");
+    for (prog) |_, i| {
+        prog[i] = parseInt(i64, it.next() orelse "0");
+    }
+    return prog;
 }
