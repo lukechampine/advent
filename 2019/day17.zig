@@ -25,7 +25,7 @@ pub fn main() void {
 
     // part 2
     prog[0] = 2;
-    out = utils.Machine.init(prog).run(([]const u8)(
+    out = utils.Machine.init(prog).run(@as([]const u8,
         \\A,B,A,C,B,C,A,B,A,C
         \\R,6,L,10,R,8,R,8
         \\R,12,L,8,L,10

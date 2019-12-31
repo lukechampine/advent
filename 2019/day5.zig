@@ -23,9 +23,10 @@ const argParser = struct {
     }
 };
 
-fn runMachine(prog: []i32, input: i32) i32 {
+fn runMachine(prog: []i32, input: i32) []i64 {
     // mutate copy
     var p = utils.dup(i32, prog);
+    var output: []i64 = utils.alloc(i64, 0);
     var i: usize = 0;
     while (i < p.len) {
         var op = @mod(p[i], 100);
@@ -35,18 +36,19 @@ fn runMachine(prog: []i32, input: i32) i32 {
             // stores
             1 => p[args.imm(3)] = args.get(1) + args.get(2),
             2 => p[args.imm(3)] = args.get(1) * args.get(2),
-            7 => p[args.imm(3)] = if (args.get(1) < args.get(2)) i32(1) else 0,
-            8 => p[args.imm(3)] = if (args.get(1) == args.get(2)) i32(1) else 0,
+            7 => p[args.imm(3)] = if (args.get(1) < args.get(2)) 1 else 0,
+            8 => p[args.imm(3)] = if (args.get(1) == args.get(2)) 1 else 0,
             // conditional jumps
             5 => i = if (args.get(1) != 0) @intCast(usize, args.get(2)) else i + 3,
             6 => i = if (args.get(1) == 0) @intCast(usize, args.get(2)) else i + 3,
             // I/O
             3 => p[args.imm(1)] = input,
-            4 => return args.get(1),
+            4 => output = utils.append(i64, output, args.get(1)),
+            99 => return output,
             else => unreachable,
         }
         i += switch (op) {
-            1, 2, 7, 8 => usize(4),
+            1, 2, 7, 8 => @intCast(usize, 4),
             5, 6 => 0, // already jumped
             3, 4 => 2,
             else => unreachable,
@@ -64,7 +66,9 @@ pub fn main() void {
     }
 
     // part 1
-    utils.println(runMachine(prog, 1));
+    var out = runMachine(prog, 1);
+    utils.println(out[out.len - 1]);
     // part 2
-    utils.println(runMachine(prog, 5));
+    out = runMachine(prog, 5);
+    utils.println(out[out.len - 1]);
 }

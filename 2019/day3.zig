@@ -8,7 +8,7 @@ pub fn main() !void {
     var steps: usize = 0;
     var it = std.mem.separate(lines[0], ",");
     while (it.next()) |d| {
-        var n = utils.parseInt(i32, d[1..]);
+        var n = utils.parseInt(i64, d[1..]);
         while (n > 0) : (n -= 1) {
             p = p.move(utils.Dir.fromUDLR(d[0]));
             steps += 1;
@@ -19,10 +19,10 @@ pub fn main() !void {
     p = utils.Pos{};
     steps = 0;
     it = std.mem.separate(lines[1], ",");
-    var bestDist: i32 = 99999999;
+    var bestDist: i64 = 99999999;
     var bestSteps: usize = 99999999;
     while (it.next()) |d| {
-        var n = utils.parseInt(i32, d[1..]);
+        var n = utils.parseInt(i64, d[1..]);
         while (n > 0) : (n -= 1) {
             p = p.move(utils.Dir.fromUDLR(d[0]));
             steps += 1;

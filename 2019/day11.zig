@@ -16,7 +16,7 @@ const robot = struct {
 
     fn run(s: *Self) bool {
         var in: i64 = switch (s.panels.getValue(s.a.pos) orelse Color.Black) {
-            Color.Black => i64(0),
+            Color.Black => 0,
             Color.White => 1,
         };
         var out = s.m.run(in) orelse return false;

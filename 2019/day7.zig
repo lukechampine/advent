@@ -37,8 +37,8 @@ const machine = struct {
                 // stores
                 1 => s.p[args.imm(3)] = args.get(1) + args.get(2),
                 2 => s.p[args.imm(3)] = args.get(1) * args.get(2),
-                7 => s.p[args.imm(3)] = if (args.get(1) < args.get(2)) i32(1) else 0,
-                8 => s.p[args.imm(3)] = if (args.get(1) == args.get(2)) i32(1) else 0,
+                7 => s.p[args.imm(3)] = if (args.get(1) < args.get(2)) 1 else 0,
+                8 => s.p[args.imm(3)] = if (args.get(1) == args.get(2)) 1 else 0,
                 // conditional jumps
                 5 => s.i = if (args.get(1) != 0) @intCast(usize, args.get(2)) else s.i + 3,
                 6 => s.i = if (args.get(1) == 0) @intCast(usize, args.get(2)) else s.i + 3,
@@ -60,7 +60,7 @@ const machine = struct {
                 else => unreachable,
             }
             s.i += switch (op) {
-                1, 2, 7, 8 => usize(4),
+                1, 2, 7, 8 => @intCast(usize, 4),
                 5, 6 => 0, // already jumped
                 3, 4 => 2,
                 else => unreachable,

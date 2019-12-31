@@ -1,11 +1,11 @@
 const std = @import("std");
 
 pub fn print(n: var) void {
-    std.debug.warn("{}", n);
+    std.debug.warn("{}", .{n});
 }
 
 pub fn println(n: var) void {
-    std.debug.warn("{}\n", n);
+    std.debug.warn("{}\n", .{n});
 }
 
 pub fn alloc(comptime T: type, n: var) []T {
@@ -34,14 +34,14 @@ pub fn deleteSlice(comptime T: type, orig: []T, i: usize) []T {
     return orig[0 .. orig.len - 1];
 }
 
-pub fn abs(x: var) @typeOf(x) {
-    if (@typeId(@typeOf(x)) == std.builtin.TypeId.ComptimeInt) {
+pub fn abs(x: var) @TypeOf(x) {
+    if (@typeId(@TypeOf(x)) == std.builtin.TypeId.ComptimeInt) {
         return if (x > 0) x else -x;
     }
-    return if (!@typeOf(x).is_signed) x else std.math.absInt(x) catch unreachable;
+    return if (!@TypeOf(x).is_signed) x else std.math.absInt(x) catch unreachable;
 }
 
-pub fn gcd(a: var, b: @typeOf(a)) @typeOf(a) {
+pub fn gcd(a: var, b: @TypeOf(a)) @TypeOf(a) {
     var aa = abs(a);
     var ab = abs(b);
     while (ab != 0) {
@@ -52,7 +52,7 @@ pub fn gcd(a: var, b: @typeOf(a)) @typeOf(a) {
     return aa;
 }
 
-pub fn lcm(a: var, b: @typeOf(a)) @typeOf(a) {
+pub fn lcm(a: var, b: @TypeOf(a)) @TypeOf(a) {
     return @divExact(a * b, gcd(a, b));
 }
 
@@ -279,7 +279,7 @@ pub const Machine = struct {
     rel: i64 = 0,
 
     fn run(s: *Self, input: var) ?[]i64 {
-        var in: []i64 = switch (@typeOf(input)) {
+        var in: []i64 = switch (@TypeOf(input)) {
             []i64 => input,
             i64, comptime_int => blk: {
                 var b = alloc(i64, 1);
@@ -294,7 +294,7 @@ pub const Machine = struct {
                 break :blk b;
             },
             else => {
-                std.debug.warn("{}\n", @typeName(@typeOf(input)));
+                println(@typeName(@TypeOf(input)));
                 unreachable;
             },
         };
@@ -308,8 +308,8 @@ pub const Machine = struct {
                 // stores
                 1 => args.get(3).* = args.get(1).* + args.get(2).*,
                 2 => args.get(3).* = args.get(1).* * args.get(2).*,
-                7 => args.get(3).* = if (args.get(1).* < args.get(2).*) i64(1) else 0,
-                8 => args.get(3).* = if (args.get(1).* == args.get(2).*) i64(1) else 0,
+                7 => args.get(3).* = if (args.get(1).* < args.get(2).*) 1 else 0,
+                8 => args.get(3).* = if (args.get(1).* == args.get(2).*) 1 else 0,
                 // conditional jumps
                 5 => s.i = if (args.get(1).* != 0) @intCast(usize, args.get(2).*) else s.i + 3,
                 6 => s.i = if (args.get(1).* == 0) @intCast(usize, args.get(2).*) else s.i + 3,
@@ -338,7 +338,7 @@ pub const Machine = struct {
                 else => unreachable,
             }
             s.i += switch (op) {
-                1, 2, 7, 8 => usize(4),
+                1, 2, 7, 8 => @intCast(usize, 4),
                 5, 6 => 0, // already jumped
                 3, 4, 9 => 2,
                 else => unreachable,

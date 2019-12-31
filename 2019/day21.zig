@@ -6,7 +6,7 @@ pub fn main() void {
 
     // part 1
     // D && (!A || !C)
-    var out = utils.Machine.init(prog).run(([]const u8)(
+    var out = utils.Machine.init(prog).run(@as([]const u8,
         \\NOT A J
         \\NOT C T
         \\OR T J
@@ -18,7 +18,7 @@ pub fn main() void {
 
     // part 2
     // D && (!A || (!B && H) || (!C && (E || H)))
-    out = utils.Machine.init(prog).run(([]const u8)(
+    out = utils.Machine.init(prog).run(@as([]const u8,
         \\NOT C T
         \\OR E J
         \\OR H J
