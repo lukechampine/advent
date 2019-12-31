@@ -7,7 +7,7 @@ import (
 var input = utils.ReadInput("day5_input.txt")
 var prog = utils.ExtractInts(input)
 
-func runMachine(p []int, input int) (output int) {
+func runMachine(p []int, input int) (output []int) {
 	p = append([]int(nil), p...) // mutate a copy
 	for i := 0; i < len(p); {
 		op, flags := p[i]%100, utils.Digits(utils.Itoa(p[i]/100))
@@ -29,7 +29,7 @@ func runMachine(p []int, input int) (output int) {
 			*getArg(1) = input
 			i += 2
 		case 4:
-			return *getArg(1)
+			output = append(output, *getArg(1))
 			i += 2
 		case 5:
 			if *getArg(1) != 0 {
@@ -60,8 +60,9 @@ func runMachine(p []int, input int) (output int) {
 
 func main() {
 	// part 1
-	utils.Println(runMachine(prog, 1))
+	out := runMachine(prog, 1)
+	utils.Println(out[len(out)-1])
 	// part 2
-	utils.Println(runMachine(prog, 5))
-
+	out = runMachine(prog, 5)
+	utils.Println(out[len(out)-1])
 }
