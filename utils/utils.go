@@ -854,6 +854,22 @@ func ToByteGrid(grid []string) [][]byte {
 	return b
 }
 
+// GameOfLife runs one step of a Game-of-Life-style cellular automaton grid.
+func GameOfLife(grid [][]byte, update func(c byte, p Pos, adj []Pos) byte) [][]byte {
+	next := make([][]byte, len(grid))
+	for i := range grid {
+		next[i] = append([]byte(nil), grid[i]...)
+	}
+	for y := range grid {
+		for x, c := range grid[y] {
+			p := Pos{x, y}
+			g := Grid{len(grid[y]) - 1, len(grid) - 1}
+			next[y][x] = update(c, p, p.ValidMoves(g))
+		}
+	}
+	return next
+}
+
 type UnionFinder struct {
 	parent map[int]int
 	rank   map[int]int
