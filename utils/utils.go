@@ -414,6 +414,22 @@ func (p Pos) Polar() (rho float64, phi float64) {
 	return math.Hypot(x, y), math.Atan2(y, x)
 }
 
+func (p Pos) RotateClockwiseAround(q Pos, deg float64) Pos {
+	rho, phi := p.Rel(q).Polar()
+	phi -= (deg / 180) * math.Pi
+	return FromPolar(rho, phi).Add(q.X, q.Y)
+}
+
+func (p Pos) RotateCounterClockwiseAround(q Pos, deg float64) Pos {
+	rho, phi := p.Rel(q).Polar()
+	phi += (deg / 180) * math.Pi
+	return FromPolar(rho, phi).Add(q.X, q.Y)
+}
+
+func FromPolar(rho, phi float64) Pos {
+	return Pos{int(math.Round(rho * math.Cos(phi))), int(math.Round(rho * math.Sin(phi)))}
+}
+
 func BoundingBox(ps []Pos) (min, max Pos) {
 	min.X, min.Y = int(1e9), int(1e9)
 	max.X, max.Y = int(-1e9), int(-1e9)
@@ -723,9 +739,13 @@ func (d Dir) SpinRight(n int) Dir {
 	return (((d + Dir(n)) % 4) + 4) % 4
 }
 
+func (d Dir) SpinLeft(n int) Dir {
+	return d.SpinRight(-n)
+}
+
 func (d Dir) TurnRight() Dir  { return d.SpinRight(1) }
 func (d Dir) TurnAround() Dir { return d.SpinRight(2) }
-func (d Dir) TurnLeft() Dir   { return d.SpinRight(-1) }
+func (d Dir) TurnLeft() Dir   { return d.SpinLeft(1) }
 
 func DirFromNEWS(c byte) Dir {
 	switch c {
@@ -795,6 +815,10 @@ func (a Agent) String() string {
 	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Dir)
 }
 
+func (a *Agent) Move(d Dir, n int) {
+	a.Pos = a.Pos.Move(d, n)
+}
+
 func (a *Agent) MoveForward(n int) {
 	switch a.Dir {
 	case Up:
@@ -821,9 +845,12 @@ func (a *Agent) MoveForwardArray(n int) {
 	}
 }
 
-func (a *Agent) TurnRight()  { a.Dir = a.Dir.SpinRight(1) }
-func (a *Agent) TurnAround() { a.Dir = a.Dir.SpinRight(2) }
-func (a *Agent) TurnLeft()   { a.Dir = a.Dir.SpinRight(-1) }
+func (a *Agent) SpinRight(n int) { a.Dir = a.Dir.SpinRight(n) }
+func (a *Agent) SpinLeft(n int)  { a.Dir = a.Dir.SpinLeft(n) }
+
+func (a *Agent) TurnRight()  { a.SpinRight(1) }
+func (a *Agent) TurnAround() { a.SpinRight(2) }
+func (a *Agent) TurnLeft()   { a.SpinLeft(1) }
 
 func NewAgent(x, y int, d Dir) Agent {
 	return Agent{
