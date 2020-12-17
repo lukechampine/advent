@@ -227,6 +227,41 @@ func LCM(nums ...int) int {
 func IntToBool(i int) bool { return i != 0 }
 func BoolToInt(b bool) int { return map[bool]int{false: 0, true: 1}[b] }
 
+func ReverseString(s string) string {
+	b := []byte(s)
+	for i := 0; i < len(b)/2; i++ {
+		j := len(b) - i - 1
+		b[i], b[j] = b[j], b[i]
+	}
+	return string(b)
+}
+
+func DeleteSliceIndex(sliceptr interface{}, i int) {
+	sp := reflect.ValueOf(sliceptr)
+	if sp.Kind() != reflect.Ptr || sp.Elem().Kind() != reflect.Slice {
+		panic("not a pointer to a slice")
+	}
+	s := sp.Elem()
+	if s.Len() <= i {
+		return
+	}
+	s.Set(reflect.AppendSlice(s.Slice(0, i), s.Slice(i+1, s.Len())))
+}
+
+func DeleteSliceValue(sliceptr interface{}, v interface{}) {
+	sp := reflect.ValueOf(sliceptr)
+	if sp.Kind() != reflect.Ptr || sp.Elem().Kind() != reflect.Slice {
+		panic("not a pointer to a slice")
+	}
+	s := sp.Elem()
+	for i := 0; i < s.Len(); i++ {
+		if reflect.DeepEqual(s.Index(i).Interface(), v) {
+			s.Set(reflect.AppendSlice(s.Slice(0, i), s.Slice(i+1, s.Len())))
+			return
+		}
+	}
+}
+
 // Lines splits a string by newlines.
 func Lines(input string) []string {
 	return strings.Split(strings.TrimSpace(input), "\n")
