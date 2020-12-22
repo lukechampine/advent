@@ -1079,3 +1079,75 @@ func ByteGrid(x, y int, init ...byte) [][]byte {
 	}
 	return g
 }
+
+type StringSet struct {
+	m map[string]struct{}
+}
+
+func (set *StringSet) Add(s string) bool {
+	added := !set.Contains(s)
+	set.m[s] = struct{}{}
+	return added
+}
+
+func (set *StringSet) Delete(s string) bool {
+	deleted := set.Contains(s)
+	delete(set.m, s)
+	return deleted
+}
+
+func (set *StringSet) Contains(s string) bool {
+	_, ok := set.m[s]
+	return ok
+}
+
+func (set *StringSet) Len() int {
+	return len(set.m)
+}
+
+func (set *StringSet) Elems() []string {
+	ss := make([]string, 0, len(set.m))
+	for s := range set.m {
+		ss = append(ss, s)
+	}
+	return ss
+}
+
+func (set *StringSet) Union(other *StringSet) *StringSet {
+	u := NewStringSet()
+	for s := range set.m {
+		u.m[s] = struct{}{}
+	}
+	for s := range other.m {
+		u.m[s] = struct{}{}
+	}
+	return u
+}
+
+func (set *StringSet) Difference(other *StringSet) *StringSet {
+	u := NewStringSet()
+	for s := range set.m {
+		if !other.Contains(s) {
+			u.Add(s)
+		}
+	}
+	return u
+}
+
+func (set *StringSet) Intersection(other *StringSet) *StringSet {
+	u := NewStringSet()
+	for s := range set.m {
+		if other.Contains(s) {
+			u.Add(s)
+		}
+	}
+	return u
+}
+
+func NewStringSet(ss ...string) *StringSet {
+	m := make(map[string]struct{}, len(ss))
+	for _, s := range ss {
+		m[s] = struct{}{}
+	}
+	return &StringSet{m: m}
+}
