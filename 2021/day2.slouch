@@ -1,0 +1,9 @@
+=dir ["forward":"r", "up":"u", "down":"d"].
+=input lines | map (words |< {[dir x, int y]})
+fold {move y x} [0,0] input | 0-product
+
+=up {[y.0-x, y.1]}
+=down {[y.0+x, y.1]}
+=fwd {[y.0, y.1 | move ["r",x] | move ["u",y.0*x] ]}
+=adj {(["u":up,"d":down,"r":fwd].(y.0)) y.1 x}
+fold adj [0,[0,0]] input | _.1 | product
