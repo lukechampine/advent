@@ -1,0 +1,4 @@
+=input ints
+=inc window 2 | count -< <
+inc
+window 3 | map sum | inc

@@ -82,6 +82,25 @@ func Window(slice interface{}, n int) interface{} {
 	return w.Interface()
 }
 
+// SlidingWindow returns a slice of slices consisting of the original slice,
+// split into windows of n elements.
+func SlidingWindow(slice interface{}, n int) interface{} {
+	v := reflect.ValueOf(slice)
+	groups := v.Len() - n + 1
+	if v.Type().Kind() == reflect.String {
+		w := make([]string, groups)
+		for i := range w {
+			w[i] = v.Slice(i, i+n).String()
+		}
+		return w
+	}
+	w := reflect.MakeSlice(reflect.SliceOf(v.Type()), groups, groups)
+	for i := 0; i < w.Len(); i++ {
+		w.Index(i).Set(v.Slice(i, i+n))
+	}
+	return w.Interface()
+}
+
 // Abs returns the absolute value of x.
 func Abs(x int) int {
 	if x < 0 {
