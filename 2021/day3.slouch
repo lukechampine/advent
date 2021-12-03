@@ -1,0 +1,13 @@
+=input lines
+
+=oxy_sort sortBy [.1, .0]
+=co2_sort oxy_sort | reverse
+=rateBy { transpose y | map (histogram | x | .0.0) }
+=epsilon input | rateBy oxy_sort | fromBase 2
+=gamma   input | rateBy co2_sort | fromBase 2
+epsilon * gamma
+
+=go { filter (_.y == (rateBy x z).y) z | collect }
+=epsilon iterate (-<{[x+1, go oxy_sort x y]}) [0,input] | map _.1 | first (len == 1) | head | fromBase 2
+=gamma   iterate (-<{[x+1, go co2_sort x y]}) [0,input] | map _.1 | first (len == 1) | head | fromBase 2
+epsilon * gamma
