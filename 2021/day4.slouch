@@ -1,0 +1,9 @@
+=input ints
+=winners input | take 100
+=boards input | drop 100 | partition 25 | map (partition 5)
+=lineBingoAt map (index _ winners) | max
+=bingoAt {concat [x, transpose x] | map lineBingoAt | min}
+=unmarked { concat x | deleteAll (take (bingoAt x + 1) winners) }
+=score { sum (unmarked x) * winners.(bingoAt x) }
+boards | minBy bingoAt | score
+boards | maxBy bingoAt | score

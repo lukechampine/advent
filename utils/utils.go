@@ -101,6 +101,52 @@ func SlidingWindow(slice interface{}, n int) interface{} {
 	return w.Interface()
 }
 
+// Stride returns a slice of values from the original slice, consisting of
+// every nth "step".
+func Stride(slice interface{}, n int) interface{} {
+	v := reflect.ValueOf(slice)
+	if v.Type().Kind() == reflect.String {
+		var s string
+		for i := 0; i < v.Len(); i += n {
+			s += v.Slice(i, i+1).String()
+		}
+		return s
+	}
+	w := reflect.MakeSlice(v.Type(), 0, v.Len()/n+1)
+	for i := 0; i < v.Len(); i += n {
+		w = reflect.Append(w, v.Index(i))
+	}
+	return w.Interface()
+}
+
+func Transpose(slice interface{}) interface{} {
+	v := reflect.ValueOf(slice)
+	if v.Type().Kind() != reflect.Slice {
+		panic("not a slice")
+	}
+	switch v.Type().Elem().Kind() {
+	case reflect.String:
+		t := make([]string, len(v.Index(0).String()))
+		for i := 0; i < v.Len(); i++ {
+			for j, c := range v.Index(i).String() {
+				t[j] += string(c)
+			}
+		}
+		return t
+	case reflect.Slice:
+		t := reflect.MakeSlice(v.Type(), v.Index(0).Len(), v.Index(0).Len())
+		for i := 0; i < v.Len(); i++ {
+			s := v.Index(i)
+			for j := 0; j < s.Len(); j++ {
+				t.Index(j).Set(reflect.Append(t.Index(j), s.Index(j)))
+			}
+		}
+		return t.Interface()
+	default:
+		panic("not a slice of slices or strings")
+	}
+}
+
 // Abs returns the absolute value of x.
 func Abs(x int) int {
 	if x < 0 {
