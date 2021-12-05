@@ -1,0 +1,4 @@
+=input ints | partition 4 | map (partition 2)
+=intersections concatmap (-< draw) | histogram | vals | count (> 1)
+filter (transpose | any (-< ==)) | intersections
+intersections
