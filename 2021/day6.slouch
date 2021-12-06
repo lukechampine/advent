@@ -1,0 +1,5 @@
+=input ints
+=fish enum 0 8 | map (count _ input)
+=step rotate 1 | { set 6 (+x.8) x }
+iterate step fish | .80 | sum
+iterate step fish | .256 | sum
