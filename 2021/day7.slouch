@@ -1,0 +1,3 @@
+=input ints
+median | { input | map (-x | abs) | sum }
+mean | { input | map (-x | abs |: (_+_*_)/2 ) | sum }
