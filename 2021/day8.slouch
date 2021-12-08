@@ -1,0 +1,8 @@
+=input lines | map (split "|" | map words)
+map (.1 | count (len | in [2,4,3,7])) | sum
+=segs ["abcefg", "cf",     "acdeg", "acdfg",   "bcdf",
+       "abdfg",  "abdefg", "acf",   "abcdefg", "abcdfg"]
+=csum { map ((x | flatten | histogram).) | sum }
+=lookup map (csum segs) segs
+=output -<{ map (csum x) y | map (indexIn lookup) | fromDigits }
+map output | sum
