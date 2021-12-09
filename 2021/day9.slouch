@@ -1,0 +1,8 @@
+=input lines | map digits
+=grid input | { [head x | len - 1, len x - 1] }
+=at -<{input.y.x}
+=neighbors adj | filter (within grid) | map at
+=lowest enum [0,0] grid | filter { neighbors x | all (> (at x)) }
+lowest | map (at + 1) | sum
+=basins lowest | map (flood { within grid x and at x != 9 } | sortBy [.0, .1]) | uniq
+basins | map len | sortBy (>) | take 3 | product
