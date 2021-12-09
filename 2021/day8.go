@@ -7,64 +7,68 @@ import (
 var input = utils.Input(2021, 8)
 var inputLines = utils.Lines(input)
 
-var segments = map[string]byte{
-	"abcefg":  '0',
-	"cf":      '1',
-	"acdeg":   '2',
-	"acdfg":   '3',
-	"bcdf":    '4',
-	"abdfg":   '5',
-	"abdefg":  '6',
-	"acf":     '7',
-	"abcdefg": '8',
-	"abcdfg":  '9',
-}
-
-var perms = func() []string {
-	all := "abcdefg"
-	var perms []string
-	for _, p := range utils.Perms(7) {
-		b := make([]byte, 7)
-		for i, j := range p {
-			b[i] = all[j]
+func solve(seq string, output string) int {
+	toMask := func(s string) uint8 {
+		var mask uint8
+		for _, c := range s {
+			mask |= 1 << (c - 'a')
 		}
-		perms = append(perms, string(b))
+		return mask
 	}
-	return perms
-}()
 
-func sub(seq string, mapping string) string {
-	b := []byte(seq)
-	for i, c := range b {
-		if c != ' ' {
-			b[i] = mapping[c-'a']
+	// determine easy digits
+	var digits [10]uint8
+	words := utils.Split(seq, " ")
+	for _, w := range words {
+		switch len(w) {
+		case 2:
+			digits[1] = toMask(w)
+		case 3:
+			digits[7] = toMask(w)
+		case 4:
+			digits[4] = toMask(w)
+		case 7:
+			digits[8] = toMask(w)
 		}
 	}
-	return string(b)
-}
 
-func isValid(seq string) bool {
-	digits := utils.Split(seq, " ")
-	return utils.All(len(digits), func(i int) bool {
-		return segments[utils.SortString(digits[i])] != 0
-	})
-}
-
-func solve(seq string) string {
-	for _, p := range perms {
-		if isValid(sub(seq, p)) {
-			return p
+	// determine remaining digits
+	covers := func(a, b uint8) bool { return a&b == a }
+	bd := digits[4] &^ digits[1]
+	for _, w := range words {
+		switch len(w) {
+		case 5: // 2, 3, 5
+			if m := toMask(w); covers(digits[1], m) {
+				digits[3] = m
+			} else if covers(bd, m) {
+				digits[5] = m
+			} else {
+				digits[2] = m
+			}
+		case 6: // 0, 6, 9
+			if m := toMask(w); !covers(digits[1], m) {
+				digits[6] = m
+			} else if !covers(bd, m) {
+				digits[0] = m
+			} else {
+				digits[9] = m
+			}
 		}
 	}
-	panic("unsolvable")
-}
 
-func atoi(output string) int {
-	var digits []byte
-	for _, o := range utils.Split(output, " ") {
-		digits = append(digits, segments[utils.SortString(o)])
+	// translate output
+	words = utils.Split(output, " ")
+	b := make([]byte, len(words))
+	for i, w := range words {
+		m := toMask(w)
+		for n, d := range digits {
+			if d == m {
+				b[i] = '0' + byte(n)
+				break
+			}
+		}
 	}
-	return utils.Atoi(string(digits))
+	return utils.Atoi(string(b))
 }
 
 func main() {
@@ -83,7 +87,7 @@ func main() {
 	sum = 0
 	for _, line := range inputLines {
 		parts := utils.Split(line, " | ")
-		sum += atoi(sub(parts[1], solve(parts[0])))
+		sum += solve(parts[0], parts[1])
 	}
 	utils.Println(sum)
 }
