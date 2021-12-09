@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math/bits"
+
 	"lukechampine.com/advent/utils"
 )
 
@@ -16,57 +18,28 @@ func solve(seq string, output string) int {
 		return mask
 	}
 
-	// determine easy digits
-	var digits [10]uint8
-	words := utils.Split(seq, " ")
-	for _, w := range words {
+	masks := make(map[int]uint8)
+	for _, w := range utils.Split(seq, " ") {
 		switch len(w) {
-		case 2:
-			digits[1] = toMask(w)
-		case 3:
-			digits[7] = toMask(w)
-		case 4:
-			digits[4] = toMask(w)
-		case 7:
-			digits[8] = toMask(w)
+		case 2, 4:
+			masks[len(w)] = toMask(w)
 		}
 	}
-
-	// determine remaining digits
-	covers := func(a, b uint8) bool { return a&b == a }
-	bd := digits[4] &^ digits[1]
-	for _, w := range words {
-		switch len(w) {
-		case 5: // 2, 3, 5
-			if m := toMask(w); covers(digits[1], m) {
-				digits[3] = m
-			} else if covers(bd, m) {
-				digits[5] = m
-			} else {
-				digits[2] = m
-			}
-		case 6: // 0, 6, 9
-			if m := toMask(w); !covers(digits[1], m) {
-				digits[6] = m
-			} else if !covers(bd, m) {
-				digits[0] = m
-			} else {
-				digits[9] = m
-			}
-		}
-	}
-
-	// translate output
-	words = utils.Split(output, " ")
-	b := make([]byte, len(words))
-	for i, w := range words {
+	var b []byte
+	for _, w := range utils.Split(output, " ") {
 		m := toMask(w)
-		for n, d := range digits {
-			if d == m {
-				b[i] = '0' + byte(n)
-				break
-			}
-		}
+		b = append(b, map[[3]int]byte{
+			{6, 3, 2}: '0',
+			{2, 2, 2}: '1',
+			{5, 2, 1}: '2',
+			{5, 3, 2}: '3',
+			{4, 4, 2}: '4',
+			{5, 3, 1}: '5',
+			{6, 3, 1}: '6',
+			{3, 2, 2}: '7',
+			{7, 4, 2}: '8',
+			{6, 4, 2}: '9',
+		}[[3]int{bits.OnesCount8(m), bits.OnesCount8(m & masks[4]), bits.OnesCount8(m & masks[2])}])
 	}
 	return utils.Atoi(string(b))
 }
