@@ -1,0 +1,7 @@
+=input lines
+=reduced input | map (stabilize (concat | deleteAll ["()", "[]", "{}", "<>"]))
+=isCorrupted containsAny (chars ")]}>")
+=score1 first (in ")]}>") | [")": 3, "]": 57, "}": 1197, ">": 25137].
+reduced | filter isCorrupted | map score1 | sum
+=score2 reverse | fold { x*5 + (index y " ([{<") } 0
+reduced | filter (isCorrupted | not) | map score2 | median
