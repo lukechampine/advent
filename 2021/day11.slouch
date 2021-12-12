@@ -1,0 +1,11 @@
+=input lines | map digits
+=neighbors adj8 | filter (within (dims input))
+=ps { enum [0,0] (dims input) | filter (y._ | x) }
+=charge fold { set y (+1) x }
+=zero fold { set y 0 x }
+=flash { [charge x (neighbors y), filter (x._ == 9) (neighbors y) ] }
+=reset { zero x (ps (>9) x) }
+=step map (map (+1)) | { exhaust flash (ps (==10) x) x } | reset
+=numFlashed flatten | count 0
+iterate step | take 101 | map numFlashed | sum
+iterate step | takeWhile (numFlashed != (dims input |< *)) | len
