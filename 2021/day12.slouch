@@ -1,0 +1,8 @@
+=input lines | map (split "-")
+=edges concat [input, map reverse input] | graph
+=isUpper -:(== toUpper)
+=part1 { -:(isUpper or not (in x)) }
+dfs { [true: [x+1,[]], false:[x, keys edges.y | filter (part1 z)]].(y=="end") } 0 "start"
+=noDoubles filter (not isUpper) | histogram | all (.1 < 2)
+=part2 { -:((part1 x) or (!= "start" and noDoubles x)) }
+dfs { [true: [x+1,[]], false:[x, keys edges.y | filter (part2 z)]].(y=="end") } 0 "start"
