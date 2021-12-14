@@ -1,0 +1,7 @@
+=input split "\n\n"
+=paper input.0 | lines | map ints
+=folds input.1 | lines | map {[int (x.11 == "y"), ints x | head]}
+=reflect -<{ map (set x (2*y-)) }
+=foldOver { cleave (.(y.0) < y.1) x | set 1 (reflect y) | concat | uniq }
+foldOver paper (head folds) | len
+fold foldOver paper folds | render "#" " "
