@@ -1,0 +1,9 @@
+=input lines | map digits
+=end dims | map (-1)
+=neighbours adj | filter (within (dims input)) | map {[x, input.x]}
+dijkstra neighbours [0,0] (end input) | map (input.) | sum - 1
+
+=row input | map (iterate (map (%9+1)) | take 5 | flatten)
+=cave iterate (map (map (%9+1))) row | take 5 | flatten
+=caveneighbours adj | filter (within (dims cave)) | map {[x, cave.x]}
+dijkstra caveneighbours [0,0] (end cave) | map (cave.) | sum - 1
