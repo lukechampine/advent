@@ -1,0 +1,7 @@
+=input split "\n\n"
+=template input.0 | window 2 | histogram
+=rules input.1 | lines | concatmap (split " -> ") | assoc
+=expand concatmap -<{ [x.0 + rules.x, y, rules.x + x.1, y] } | assocWith (+)
+=charcounts concatmap -<{[x.0, y]} | assocWith (+) | vals
+iterate expand template | .10 | charcounts |: max - min + 1
+iterate expand template | .40 | charcounts |: max - min + 1
