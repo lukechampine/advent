@@ -1,0 +1,3 @@
+=ranges lines | map (split "," | map (split "-" | map int |< {enum x (y+1)}))
+ranges | count -<{(same x y) == x or (same x y) == y}
+ranges | count -<containsAny

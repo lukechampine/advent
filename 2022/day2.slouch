@@ -1,0 +1,3 @@
+=input lines | map (words | map (indexIn "ABCXYZ" % 3))
+sumBy -<{3*(rotate (--x) [1,2,0]).y + y + 1}
+sumBy -<{3*y + (rotate x [2,0,1]).y + 1}

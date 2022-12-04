@@ -1,0 +1,4 @@
+=priority 1 + indexIn (concat [alpha, toUpper alpha])
+=score map (fold1 same) | sumBy priority
+lines | map {cleave (len x / 2) x} | score
+lines | partition 3 | score
