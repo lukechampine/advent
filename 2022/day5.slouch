@@ -1,0 +1,8 @@
+=groups input | split "\n\n" | map lines
+=stacks groups.0 | take (--1) | transpose | map (deleteAll "[ ]") | filter (len > 0)
+=moves groups.1 | map ints
+=move1 { set x (drop 1) (set y (prepend (take 1 z.x)) z) }
+=move { iterate (move1 (y.1-1) (y.2-1)) x | .(y.0) }
+fold move stacks moves | map head
+=moven { set (y.1-1) (drop y.0) (set (y.2-1) (prepend (take y.0 x.(y.1-1))) x) }
+fold moven stacks moves | map head

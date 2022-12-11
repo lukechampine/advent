@@ -1,0 +1,2 @@
+window 4  | index (uniq | len == 4) + 4
+window 14 | index (uniq | len == 14) + 14

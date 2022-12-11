@@ -1,0 +1,5 @@
+=seq input | lines | concatmap (words | {["noop":["0"], "addx":["0",last x]].(x.0) }) | map int
+=fn { [x.0+1, x.1+y, x.2 + ((x.0-20 %? 40) | int * x.0 * x.1)] }
+fold fn [1,1,0] seq | .2
+=fn { [ x.0+1, x.1+y, abs (x.1-(x.0%40)) <= 1 | [true:(append [x.0%40,x.0/40] x.2), false:x.2]._ ] }
+fold fn [0,1,[]] seq | .2 | render "#" " "

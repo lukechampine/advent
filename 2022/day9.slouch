@@ -1,0 +1,5 @@
+=cmds input | lines | concatmap (toLower | words |< { replicate (int y) [x, 1] })
+=path0 scan (flip move) [0,0] cmds
+=rope iterate (tail | scan (flip moveTo) [0,0]) path0 | take 10
+rope.1 | uniq | len
+rope.9 | uniq | len

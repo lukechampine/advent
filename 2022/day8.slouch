@@ -1,0 +1,9 @@
+=grid input | lines | map chars
+=edges -<{ [[x, 0], [0, y], [x, len grid - 1], [len grid.0 - 1, y]] }
+=crosshair { edges x | map (draw x | tail) }
+=below { grid.y < grid.x }
+=visible { crosshair x | any (all (below x)) }
+=takeWhileI { takeWhile x y | len+1 | take _ y }
+=score { crosshair x | map (takeWhileI (below x) | len) | product }
+enum [0,0] (dims grid) | count visible
+enum [0,0] (dims grid) | map score | max
