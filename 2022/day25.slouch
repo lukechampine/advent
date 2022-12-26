@@ -1,0 +1,5 @@
+=snafu ["=":--2, "-":--1, "0":0, "1":1, "2":2]
+=allTwos toBase 5 | len | replicate _ "2" | fromBase 5
+=fromSNAFU tr snafu | map (+2 | string) | fromBase 5 | -:(- allTwos)
+=toSNAFU -:(+ allTwos) | toBase 5 | map (int | -2) | tr (invert snafu)
+input | lines | sumBy fromSNAFU | toSNAFU
