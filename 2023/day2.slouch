@@ -1,0 +1,4 @@
+=maxCubes words | drop 2 | partition 2 | concatmap -<{[y.0, int x]} | assocWith {max [x, y]}
+=possible {x."r" <= 12 and x."g" <= 13 and x."b" <= 14 }
+lines | filter (maxCubes | possible) | sumWith (ints | head)
+lines | sumWith (maxCubes | vals | product)

@@ -1,0 +1,3 @@
+=waysToWin -<{ sqrt(x*x - 4*y) + 1 }
+lines | map ints | transpose | productWith waysToWin
+lines | map (words | tail | concat | int) | waysToWin

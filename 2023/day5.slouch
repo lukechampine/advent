@@ -1,0 +1,4 @@
+=maps input | groups | tail | map (tail | map ints)
+=inMap { y.1 <= x and x <= y.1+y.2 }
+=doMap { first (inMap x) (append [x,x,1] y) |: x + .0 - .1 }
+groups | head | ints | minWith (fold doMap _ maps)

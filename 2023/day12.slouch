@@ -1,0 +1,19 @@
+input | lines | map (words | set 1 ints)
+
+; x = [2,2,1]
+=isBlock concatmap (replicate _ true | prepend false) | append false
+
+=alts { map -:((_ and x != ".") or ((not _) and x != "#")) isBlock } | prepend false
+=next { map (_ and x != ".") isBlock }
+
+zipWith (or | int) (alts ".") (next ".")
+
+
+; x = [1,2,3], y = "#"
+; =alts alts y
+; =next next y
+; zipWith (+) (zipWith (*) x next) alts
+=doNFA {  }
+
+
+fold doNFA [1, 1, 0, 0, 0] ".#?.##??.??"

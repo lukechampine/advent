@@ -1,0 +1,9 @@
+=kind contains
+=house -:(kind 2 and kind 3)
+=twopair -:(kind 2 and (.2 | len) == 2)
+=score head | histogram | invert | match [kind 5:6, kind 4:5, house:4, kind 3:3, twopair:2, kind 2:1, _:0]
+=strength { zip (head y) (head z) | append "AK" | first -:(.0 != .1) | map (indexIn x) } |< >
+=hands lines | map (words |< {[x, int y]})
+hands | sortBy [score, strength "AKQJT98765432"] | zipWith (* last) (tail iota) | sum
+=improve { tr ["J": maxBy (count _ x) "AKQT98765432"] x }
+hands | sortBy [set 0 improve | score, strength "AKQT98765432J"] | zipWith (* last) (tail iota) | sum

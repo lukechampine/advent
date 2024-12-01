@@ -1,0 +1,5 @@
+=wins input | lines | map (split "|" |< { same (ints x | drop 1) (ints y) } | len)
+wins | sumWith (pow 2 / 2)
+=total 1 + sumWith (.1)
+=acc { [x.0 + total x.1, x.1 | map (set 0 (-1)) | append [y, total x.1] | filter (.0 > 0)] }
+fold acc [0, []] wins | head

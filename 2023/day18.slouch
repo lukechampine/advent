@@ -1,0 +1,6 @@
+=parse1 words | take 2 | set 1 int
+=parse2 words | last | deleteAll "(#)" | {[last x | int | "RDLU"._, take --1 x | fromBase 16] }
+=inner scan (flip move) [0,0] | area
+=perim sumWith (.1)
+lines | map parse1 |: inner + perim/2 + 1
+lines | map parse2 |: inner + perim/2 + 1

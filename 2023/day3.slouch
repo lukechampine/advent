@@ -1,0 +1,6 @@
+=grid input | lines | map chars
+=nums enum [0,0] (dims grid) | partition (len grid.0) | concatmap (split (grid._ | not (in numeric)))
+=neighbors concatmap adj8 | filter (within (dims grid |< {[x-1,y-1]}))
+nums | filter (neighbors | any (grid._ |: != "." and not (in numeric))) | sumWith (intWith grid._)
+=gears nums | filter (neighbors | any (grid._ == "*")) | mapTo (neighbors | first (grid._ == "*"))
+gears | invert | vals | filter (len == 2) | sumWith (productWith (intWith grid._))

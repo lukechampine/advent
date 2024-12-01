@@ -1,0 +1,7 @@
+=insts input | groups | .0.0 | chars | map (indexIn "LR")
+=network input | groups | .1 | map (deleteAll "=,()" | words |< {[x, [y, z]]}) | assoc
+=follow scan { network.x | .y } _ (cycle insts)
+follow "AAA" | 1 + index "ZZZ"
+=starts network | keys | filter (last == "A")
+=cyclelen dropWhile (last != "Z") | tail | 1 + index (last == "Z")
+starts | map (follow | cyclelen) | lcm

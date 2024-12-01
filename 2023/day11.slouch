@@ -1,0 +1,10 @@
+=grid input | lines | map chars
+=galaxies enum [0,0] (dims grid) | filter (grid._ == "#")
+=empty { enum 0 (len x) | filter (x._ | all (== ".")) }
+=emptyRows empty grid
+=emptyCols empty (transpose grid)
+=crosses {(x.0 <= y and y <= x.1) or (x.1 <= y and y <= x.0)}
+=manhattan galaxies | pairs | sumWith -<(zipWith (-) | sumWith abs)
+=crossings galaxies | pairs | sumWith (transpose |< { count (crosses x) emptyCols + count (crosses y) emptyRows })
+manhattan + crossings
+manhattan + 999999*crossings

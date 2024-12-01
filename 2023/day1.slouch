@@ -1,0 +1,5 @@
+lines | sumWith (join " " | ints |: (10*head + last))
+=names ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+=nums zipWith {[[x, y], [string y, y]]} names (tail iota) | concat | assoc
+=fstnum nums.{first (hasPrefix _ x) (keys nums)}
+lines | sumWith (tails | filter {any (hasPrefix _ x) (keys nums)} | map fstnum |: (10*head + last))

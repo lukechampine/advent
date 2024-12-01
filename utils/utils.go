@@ -58,7 +58,7 @@ func ReadInput(filename string) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(bytes.TrimSpace(data))
+	return string(data)
 }
 
 // Window returns a slice of slices consisting of the original slice, split into
@@ -273,6 +273,15 @@ func Sum(n int, fn func(i int) int) (c int) {
 	return
 }
 
+// Product returns the product of f(i) for i in [0..n).
+func Product(n int, fn func(i int) int) (c int) {
+	c = 1
+	for i := 0; i < n; i++ {
+		c *= fn(i)
+	}
+	return
+}
+
 func GCD(a, b int) int {
 	a, b = Abs(a), Abs(b)
 	for b != 0 {
@@ -289,8 +298,23 @@ func LCM(nums ...int) int {
 	return result
 }
 
+func Signum(x int) int {
+	if x < 0 {
+		return -1
+	}
+	if x > 0 {
+		return 1
+	}
+	return 0
+}
+
 func IntToBool(i int) bool { return i != 0 }
-func BoolToInt(b bool) int { return map[bool]int{false: 0, true: 1}[b] }
+func BoolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
 
 func ReverseString(s string) string {
 	b := []byte(s)
@@ -464,6 +488,8 @@ type Pos struct {
 	X, Y int
 }
 
+var Origin = Pos{0, 0}
+
 func (p Pos) Dist(q Pos) int {
 	return Abs(p.X-q.X) + Abs(p.Y-q.Y)
 }
@@ -514,6 +540,11 @@ func (p Pos) Polar() (rho float64, phi float64) {
 	return math.Hypot(x, y), math.Atan2(y, x)
 }
 
+func (p Pos) DirTo(q Pos) Dir {
+	_, phi := q.Rel(p).Polar()
+	return Dir(2*phi/math.Pi) + 1
+}
+
 func (p Pos) RotateClockwiseAround(q Pos, deg float64) Pos {
 	rho, phi := p.Rel(q).Polar()
 	phi -= (deg / 180) * math.Pi
@@ -542,6 +573,11 @@ func BoundingBox(ps []Pos) (min, max Pos) {
 	return
 }
 
+func BoundingRect(ps []Pos) Rect {
+	min, max := BoundingBox(ps)
+	return Rect{min, max}
+}
+
 func PrintPositions(ps []Pos, empty, full rune) {
 	min, max := BoundingBox(ps)
 	for i := range ps {
@@ -564,6 +600,55 @@ func PrintPositions(ps []Pos, empty, full rune) {
 	}
 }
 
+type Rect struct {
+	Min, Max Pos
+}
+
+func (r Rect) Width() int  { return r.Max.Rel(r.Min).X }
+func (r Rect) Height() int { return r.Max.Rel(r.Min).Y }
+func (r Rect) Area() int {
+	p := r.Max.Rel(r.Min)
+	return (p.X + 1) * (p.Y + 1)
+}
+
+func (r Rect) Corners() []Pos {
+	return []Pos{
+		{r.Min.X, r.Min.Y},
+		{r.Max.X, r.Min.Y},
+		{r.Max.X, r.Max.Y},
+		{r.Min.X, r.Max.Y},
+	}
+}
+
+func (r Rect) Contains(p Pos) bool {
+	return r.Min.X <= p.X && p.X <= r.Max.X &&
+		r.Min.Y <= p.Y && p.Y <= r.Max.Y
+}
+
+func (r Rect) ContainsRect(p Rect) bool {
+	return r.Contains(p.Min) && r.Contains(p.Max)
+}
+
+func (r Rect) Overlaps(p Rect) bool {
+	return r.Min.X <= p.Max.X && p.Min.X <= r.Max.X &&
+		r.Min.Y <= p.Max.Y && p.Min.Y <= r.Max.Y
+}
+
+func (r Rect) Overlap(p Rect) Rect {
+	return Rect{
+		Min: Pos{Max(r.Min.X, p.Min.X), Max(r.Min.Y, p.Min.Y)},
+		Max: Pos{Min(r.Max.X, p.Max.X), Min(r.Max.Y, p.Max.Y)},
+	}
+}
+
+func (r Rect) ForEach(fn func(Pos)) {
+	for y := r.Min.Y; y <= r.Max.Y; y++ {
+		for x := r.Min.X; x <= r.Max.X; x++ {
+			fn(Pos{x, y})
+		}
+	}
+}
+
 type Grid struct {
 	X, Y int
 }
@@ -572,29 +657,54 @@ func (g Grid) Valid(p Pos) bool {
 	return 0 <= p.X && p.X <= g.X && 0 <= p.Y && p.Y <= g.Y
 }
 
+func (g Grid) ForEach(fn func(Pos)) {
+	for y := 0; y <= g.Y; y++ {
+		for x := 0; x <= g.X; x++ {
+			fn(Pos{x, y})
+		}
+	}
+}
+
 type LightBoard struct {
-	board [][]bool
+	Board [][]bool
 }
 
 func (l *LightBoard) Set(x, y int, lit bool) {
-	l.board[y][x] = lit
+	l.Board[y][x] = lit
 }
 
 func (l *LightBoard) Get(x, y int) bool {
-	return l.board[y][x]
+	return l.Board[y][x]
+}
+
+func (l *LightBoard) ForEach(fn func(p Pos, b bool)) {
+	for y := range l.Board {
+		for x := range l.Board[y] {
+			fn(Pos{x, y}, l.Board[y][x])
+		}
+	}
+}
+
+func (l *LightBoard) Count(set bool) (n int) {
+	l.ForEach(func(p Pos, b bool) {
+		if b == set {
+			n++
+		}
+	})
+	return
 }
 
 func (l *LightBoard) Print() {
-	for y := range l.board {
-		for x := range l.board[y] {
-			if l.board[y][x] {
-				fmt.Print("#")
-			} else {
-				fmt.Print(".")
-			}
+	l.ForEach(func(p Pos, b bool) {
+		if b {
+			fmt.Print("█")
+		} else {
+			fmt.Print(" ")
 		}
-		fmt.Println()
-	}
+		if p.X == len(l.Board[0])-1 {
+			fmt.Println()
+		}
+	})
 }
 
 func NewLightBoard(x, y int) *LightBoard {
@@ -618,7 +728,12 @@ func Locate(grid [][]byte, c byte) Pos {
 
 type Maze struct {
 	Grid
-	IsWall func(Pos) bool
+	IsWall  func(Pos) bool
+	CanMove func(Pos, Pos) bool
+}
+
+func (m Maze) canMove(p, d Pos) bool {
+	return m.Grid.Valid(d) && !m.IsWall(d) && (m.CanMove == nil || m.CanMove(p, d))
 }
 
 func (m Maze) Valid(p Pos) bool {
@@ -628,7 +743,7 @@ func (m Maze) Valid(p Pos) bool {
 func (m Maze) ValidMoves(p Pos) []Pos {
 	valid := make([]Pos, 0, 4)
 	for _, move := range p.Moves() {
-		if m.Valid(move) {
+		if m.canMove(p, move) {
 			valid = append(valid, move)
 		}
 	}
@@ -679,7 +794,7 @@ outer:
 
 func MakeSimpleMaze(grid [][]byte, wall byte) Maze {
 	return Maze{
-		Grid:   Grid{X: len(grid[0]), Y: len(grid)},
+		Grid:   Grid{X: len(grid[0]) - 1, Y: len(grid) - 1},
 		IsWall: func(p Pos) bool { return grid[p.Y][p.X] == wall },
 	}
 }
@@ -727,22 +842,22 @@ func (m Maze) DistancesFrom(p Pos) map[Pos]int {
 func (m Maze) recdistances(distances map[Pos]int, dist int, cur Pos) {
 	distances[cur] = dist
 
-	if p := (Pos{cur.X, cur.Y - 1}); m.Valid(p) {
+	if p := (Pos{cur.X, cur.Y - 1}); m.canMove(cur, p) {
 		if d, ok := distances[p]; !ok || d > dist+1 {
 			m.recdistances(distances, dist+1, p)
 		}
 	}
-	if p := (Pos{cur.X, cur.Y + 1}); m.Valid(p) {
+	if p := (Pos{cur.X, cur.Y + 1}); m.canMove(cur, p) {
 		if d, ok := distances[p]; !ok || d > dist+1 {
 			m.recdistances(distances, dist+1, p)
 		}
 	}
-	if p := (Pos{cur.X - 1, cur.Y}); m.Valid(p) {
+	if p := (Pos{cur.X - 1, cur.Y}); m.canMove(cur, p) {
 		if d, ok := distances[p]; !ok || d > dist+1 {
 			m.recdistances(distances, dist+1, p)
 		}
 	}
-	if p := (Pos{cur.X + 1, cur.Y}); m.Valid(p) {
+	if p := (Pos{cur.X + 1, cur.Y}); m.canMove(cur, p) {
 		if d, ok := distances[p]; !ok || d > dist+1 {
 			m.recdistances(distances, dist+1, p)
 		}
@@ -766,16 +881,16 @@ func (m Maze) SelectClosest(options []Pos, to Pos) []Pos {
 		dist int
 	}
 	queue := make([]entry, 0, 100)
-	if p := (Pos{to.X, to.Y - 1}); m.Valid(p) {
+	if p := (Pos{to.X, to.Y - 1}); m.canMove(p, to) {
 		queue = append(queue, entry{p, 1})
 	}
-	if p := (Pos{to.X, to.Y + 1}); m.Valid(p) {
+	if p := (Pos{to.X, to.Y + 1}); m.canMove(p, to) {
 		queue = append(queue, entry{p, 1})
 	}
-	if p := (Pos{to.X - 1, to.Y}); m.Valid(p) {
+	if p := (Pos{to.X - 1, to.Y}); m.canMove(p, to) {
 		queue = append(queue, entry{p, 1})
 	}
-	if p := (Pos{to.X + 1, to.Y}); m.Valid(p) {
+	if p := (Pos{to.X + 1, to.Y}); m.canMove(p, to) {
 		queue = append(queue, entry{p, 1})
 	}
 	seen := make(map[Pos]struct{}, 1000)
@@ -801,20 +916,67 @@ outer:
 			}
 		}
 
-		if p := (Pos{e.X, e.Y - 1}); m.Valid(p) {
+		if p := (Pos{e.X, e.Y - 1}); m.canMove(e.Pos, p) {
 			queue = append(queue, entry{p, e.dist + 1})
 		}
-		if p := (Pos{e.X, e.Y + 1}); m.Valid(p) {
+		if p := (Pos{e.X, e.Y + 1}); m.canMove(e.Pos, p) {
 			queue = append(queue, entry{p, e.dist + 1})
 		}
-		if p := (Pos{e.X - 1, e.Y}); m.Valid(p) {
+		if p := (Pos{e.X - 1, e.Y}); m.canMove(e.Pos, p) {
 			queue = append(queue, entry{p, e.dist + 1})
 		}
-		if p := (Pos{e.X + 1, e.Y}); m.Valid(p) {
+		if p := (Pos{e.X + 1, e.Y}); m.canMove(e.Pos, p) {
 			queue = append(queue, entry{p, e.dist + 1})
 		}
 	}
 	return closest
+}
+
+type MazeSolver struct {
+	Pos
+	Ch   byte
+	Dist int
+	Done bool
+}
+
+func recvisit(grid [][]byte, s MazeSolver, seen map[Pos]struct{}, fn func(*MazeSolver)) {
+	seen[s.Pos] = struct{}{}
+	fn(&s)
+	if s.Done {
+		return
+	}
+	s.Dist++
+	for _, p := range MakeSimpleMaze(grid, '#').ValidMoves(s.Pos) {
+		if _, ok := seen[p]; ok {
+			continue
+		}
+		s.Pos = p
+		s.Ch = grid[s.Y][s.X]
+		recvisit(grid, s, seen, fn)
+	}
+}
+
+func SolveMaze(grid [][]byte, start Pos, fn func(*MazeSolver)) {
+	seen := make(map[Pos]struct{})
+	s := MazeSolver{
+		Pos: start,
+		Ch:  grid[start.Y][start.X],
+	}
+	recvisit(grid, s, seen, fn)
+}
+
+func Flood(start Pos, visit func(Pos) []Pos) {
+	seen := make(map[Pos]bool)
+	queue := []Pos{start}
+	for len(queue) > 0 {
+		p := queue[0]
+		queue = queue[1:]
+		if seen[p] {
+			continue
+		}
+		seen[p] = true
+		queue = append(queue, visit(p)...)
+	}
 }
 
 type Dir int
@@ -875,6 +1037,20 @@ func DirFromUDLR(c byte) Dir {
 	panic("invalid UDLR")
 }
 
+func DirFromArrow(c byte) Dir {
+	switch c {
+	case '^':
+		return Up
+	case 'v':
+		return Down
+	case '<':
+		return Left
+	case '>':
+		return Right
+	}
+	panic("invalid ^v<>")
+}
+
 func (p Pos) Move(d Dir, n int) Pos {
 	switch d {
 	case Up:
@@ -889,18 +1065,31 @@ func (p Pos) Move(d Dir, n int) Pos {
 	return p
 }
 
+func (p Pos) MoveArray(d Dir, n int) Pos {
+	switch d {
+	case Up:
+		p.Y -= n
+	case Right:
+		p.X += n
+	case Down:
+		p.Y += n
+	case Left:
+		p.X -= n
+	}
+	return p
+}
+
 func (p Pos) Tread(d Dir, n int, fn func(Pos)) Pos {
 	for i := 0; i < n; i++ {
-		switch d {
-		case Up:
-			p.Y++
-		case Right:
-			p.X++
-		case Down:
-			p.Y++
-		case Left:
-			p.X++
-		}
+		p = p.Move(d, 1)
+		fn(p)
+	}
+	return p
+}
+
+func (p Pos) TreadArray(d Dir, n int, fn func(Pos)) Pos {
+	for i := 0; i < n; i++ {
+		p = p.MoveArray(d, 1)
 		fn(p)
 	}
 	return p
@@ -952,6 +1141,19 @@ func (a *Agent) TurnRight()  { a.SpinRight(1) }
 func (a *Agent) TurnAround() { a.SpinRight(2) }
 func (a *Agent) TurnLeft()   { a.SpinLeft(1) }
 
+func (a *Agent) ValidMoves(g Grid) []Agent {
+	as := make([]Agent, 0, 4)
+	for i := range as {
+		a := *a
+		a.SpinLeft(i)
+		a.MoveForward(1)
+		if g.Valid(a.Pos) {
+			as = append(as, a)
+		}
+	}
+	return as
+}
+
 func NewAgent(x, y int, d Dir) Agent {
 	return Agent{
 		Pos: Pos{x, y},
@@ -960,11 +1162,7 @@ func NewAgent(x, y int, d Dir) Agent {
 }
 
 func PrintGrid(grid [][]byte) {
-	grid2 := make([][]byte, len(grid))
-	for i := range grid2 {
-		grid2[i] = append([]byte(nil), grid[i]...)
-	}
-	fmt.Println(string(bytes.Join(grid2, []byte("\n"))))
+	fmt.Println(string(bytes.Join(CloneGrid(grid), []byte("\n"))))
 }
 
 func CountGrid(grid [][]byte, c byte) int {
@@ -981,12 +1179,17 @@ func ToByteGrid(grid []string) [][]byte {
 	return b
 }
 
+func CloneGrid(grid [][]byte) [][]byte {
+	b := make([][]byte, len(grid))
+	for i := range b {
+		b[i] = append([]byte(nil), grid[i]...)
+	}
+	return b
+}
+
 // GameOfLife runs one step of a Game-of-Life-style cellular automaton grid.
 func GameOfLife(grid [][]byte, update func(c byte, p Pos, adj []Pos) byte) [][]byte {
-	next := make([][]byte, len(grid))
-	for i := range grid {
-		next[i] = append([]byte(nil), grid[i]...)
-	}
+	next := CloneGrid(grid)
 	for y := range grid {
 		for x, c := range grid[y] {
 			p := Pos{x, y}
@@ -1140,6 +1343,17 @@ func ByteGrid(x, y int, init ...byte) [][]byte {
 			for j := range g[i] {
 				g[i][j] = init[0]
 			}
+		}
+	}
+	return g
+}
+
+func Surround(grid [][]byte, c byte) [][]byte {
+	g := make([][]byte, len(grid)+2)
+	for y := range g {
+		g[y] = bytes.Repeat([]byte{c}, len(grid[0])+2)
+		if 0 < y && y < len(g)-1 {
+			copy(g[y][1:], grid[y-1])
 		}
 	}
 	return g

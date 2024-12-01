@@ -1,0 +1,4 @@
+=isMirror set 0 reverse |< zip | all -<(==)
+=isHorizontal cleaves | any isMirror
+=mirrorPos cleaves | firstIndex isMirror
+groups | cleave isHorizontal |< { (sumWith (mirrorPos*100) x) + (sumWith (transpose | mirrorPos) y) }

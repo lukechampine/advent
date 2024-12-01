@@ -1,0 +1,3 @@
+=predict iterate deltas | takeWhile (any (!= 0)) | sumWith last
+lines | map ints | sumWith predict
+lines | map (ints | reverse) | sumWith predict
