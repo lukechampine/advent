@@ -1,0 +1,3 @@
+=cols input | lines | map ints | transpose
+cols | map sort |< zipWith (- | abs) | sum
+cols.0 | sumWith { x * (count x cols.1) }
