@@ -1,4 +1,4 @@
-=input input | lines | map ints
+=input lines | map ints
 =safe deltas |: (all (>0) or all (<0)) and (all (abs |: >0 and <4))
 count safe
 =alts cleaves | map (set 1 tail | concat)

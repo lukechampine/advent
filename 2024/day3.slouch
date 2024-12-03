@@ -1,0 +1,4 @@
+=input regex `mul\((\d+),(\d+)\)|do\(\)|don't\(\)`
+sumWith (ints | product)
+=enabled scan { match [true: (y == "do()"), false: x] (y | contains "do") } true input
+zipWith {(int x) * (y | ints | product)} enabled | sum

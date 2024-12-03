@@ -1,3 +1,4 @@
 pub fn ints(s: &str) -> impl Iterator<Item = i64> + '_ {
-    s.split_whitespace().map(|n| n.parse().unwrap())
+    s.split(|c: char| !c.is_ascii_digit())
+        .filter_map(|s| s.parse().ok())
 }
