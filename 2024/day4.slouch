@@ -1,0 +1,4 @@
+=input input | lines | map chars
+=vars concat [input, (transpose input), (diags input), (diags (map reverse (transpose input)))]
+vars | map concat | sumWith -:(count "XMAS" + count "SAMX")
+stamps [[0,0],[0,2],[1,1],[2,0],[2,2]] | map concat | count (in ["MSAMS", "SMASM", "MMASS", "SSAMM"])
