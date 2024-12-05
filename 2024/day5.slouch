@@ -1,0 +1,4 @@
+=sort sortBy { input | groups | .0 | contains (x + "|" + y) }
+=parts input | groups | .1 | map (split ",") | cleave -:(_ == sort)
+parts.0 | sumWith -:(.(len/2) | int)
+parts.1 | sumWith (sort |: .(len/2) | int)
