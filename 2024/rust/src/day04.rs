@@ -1,18 +1,19 @@
-fn stamps(grid: Vec<&str>, stamp: Vec<(usize, usize)>) -> Vec<String> {
-    grid.iter()
-        .enumerate()
-        .flat_map(move |(y, row)| (0..row.len()).map(move |x| (x, y)))
-        .filter_map(|(x, y)| {
-            let stamped: String = stamp
+use crate::utils;
+
+fn stamps(g: &utils::Grid, stamp: Vec<utils::Point>) -> Vec<String> {
+    g.iter()
+        .map(|(p, _)| {
+            stamp
                 .iter()
-                .filter_map(|(dx, dy)| grid.get(y + dy).and_then(|row| row.chars().nth(x + dx)))
-                .collect();
-            (stamped.len() == stamp.len()).then_some(stamped)
+                .map(|&s| p.add(s))
+                .filter_map(|p| g.in_bounds(p).then(|| g.at(p) as char))
+                .collect()
         })
         .collect()
 }
 
 pub fn part1(input: &str) -> String {
+    let g = utils::Grid::from_string(input);
     [
         [(0, 0), (1, 0), (2, 0), (3, 0)],
         [(0, 0), (0, 1), (0, 2), (0, 3)],
@@ -21,7 +22,7 @@ pub fn part1(input: &str) -> String {
     ]
     .iter()
     .map(|stamp| {
-        stamps(input.lines().collect(), stamp.to_vec())
+        stamps(&g, stamp.map(|p| p.into()).to_vec())
             .iter()
             .filter(|&s| s == "XMAS" || s == "SAMX")
             .count() as i64
@@ -31,8 +32,9 @@ pub fn part1(input: &str) -> String {
 }
 
 pub fn part2(input: &str) -> String {
-    let cross = vec![(0, 0), (2, 0), (1, 1), (0, 2), (2, 2)];
-    stamps(input.lines().collect(), cross)
+    let g = utils::Grid::from_string(input);
+    let cross = [(0, 0), (2, 0), (1, 1), (0, 2), (2, 2)];
+    stamps(&g, cross.map(|p| p.into()).to_vec())
         .iter()
         .filter(|&s| s == "MSAMS" || s == "SMASM" || s == "MMASS" || s == "SSAMM")
         .count()

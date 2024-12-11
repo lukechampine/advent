@@ -1,83 +1,64 @@
 use std::collections::HashSet;
 
-fn parse(input: &str) -> Vec<Vec<char>> {
-    input.lines().map(|line| line.chars().collect()).collect()
-}
+use crate::utils;
 
-fn start(grid: &Vec<Vec<char>>) -> (isize, isize) {
-    for y in 0..grid.len() {
-        for x in 0..grid[y].len() {
-            if grid[y][x] == '^' {
-                return (x as isize, y as isize);
-            }
-        }
+fn turn_right(dir: utils::Point) -> utils::Point {
+    match dir {
+        utils::Point { x: 0, y: -1 } => utils::Point { x: 1, y: 0 },
+        utils::Point { x: 1, y: 0 } => utils::Point { x: 0, y: 1 },
+        utils::Point { x: 0, y: 1 } => utils::Point { x: -1, y: 0 },
+        utils::Point { x: -1, y: 0 } => utils::Point { x: 0, y: -1 },
+        _ => unreachable!(),
     }
-    unreachable!()
 }
 
-fn visit(grid: &Vec<Vec<char>>) -> HashSet<(isize, isize)> {
-    let (mut x, mut y) = start(&grid);
-    let mut dir = (0, -1);
+fn visit(g: &utils::Grid) -> HashSet<utils::Point> {
+    let mut p = g.iter().find(|&(_, c)| c == b'^').unwrap().0;
+    let mut dir = utils::Point { x: 0, y: -1 };
     let mut seen = HashSet::new();
     loop {
-        let (nx, ny) = (x + dir.0, y + dir.1);
-        if nx < 0 || nx >= grid[0].len() as isize || ny < 0 || ny >= grid.len() as isize {
+        let n = p.add(dir);
+        if !g.in_bounds(n) {
             return seen;
-        }
-        if grid[ny as usize][nx as usize] == '#' {
-            // turn right
-            dir = match dir {
-                (0, -1) => (1, 0),
-                (1, 0) => (0, 1),
-                (0, 1) => (-1, 0),
-                (-1, 0) => (0, -1),
-                _ => unreachable!(),
-            };
+        } else if g.at(n) == b'#' {
+            dir = turn_right(dir);
         } else {
-            (x, y) = (nx, ny);
-            seen.insert((x, y));
+            p = n;
+            seen.insert(p);
         }
     }
 }
 
 pub fn part1(input: &str) -> String {
-    let grid = parse(input);
-    visit(&grid).len().to_string()
+    let g = utils::Grid::from_string(input);
+    visit(&g).len().to_string()
 }
 
-fn has_cycle(grid: &Vec<Vec<char>>, cx: isize, cy: isize) -> bool {
-    let (mut x, mut y) = start(&grid);
-    let mut dir = (0, -1);
+fn has_cycle(g: &utils::Grid, c: utils::Point) -> bool {
+    let mut p = g.iter().find(|&(_, c)| c == b'^').unwrap().0;
+    let mut dir = utils::Point { x: 0, y: -1 };
     let mut seen = HashSet::new();
     loop {
-        let (nx, ny) = (x + dir.0, y + dir.1);
-        if nx < 0 || nx >= grid[0].len() as isize || ny < 0 || ny >= grid.len() as isize {
+        let n = p.add(dir);
+        if !g.in_bounds(n) {
             return false;
-        }
-        if grid[ny as usize][nx as usize] == '#' || (nx, ny) == (cx, cy) {
-            if !seen.insert((x, y, dir)) {
+        } else if g.at(n) == b'#' || n == c {
+            if !seen.insert((p, dir)) {
                 return true;
             }
-            // turn right
-            dir = match dir {
-                (0, -1) => (1, 0),
-                (1, 0) => (0, 1),
-                (0, 1) => (-1, 0),
-                (-1, 0) => (0, -1),
-                _ => unreachable!(),
-            };
+            dir = turn_right(dir);
         } else {
-            (x, y) = (nx, ny);
+            p = n;
         }
     }
 }
 
 pub fn part2(input: &str) -> String {
-    let grid = parse(input);
-    let start = start(&grid);
-    visit(&grid)
+    let g = utils::Grid::from_string(input);
+    let start = g.iter().find(|&(_, c)| c == b'^').unwrap().0;
+    visit(&g)
         .iter()
-        .filter(|&&(x, y)| (x, y) != start && has_cycle(&grid, x, y))
+        .filter(|&&p| p != start && has_cycle(&g, p))
         .count()
         .to_string()
 }
