@@ -15,12 +15,12 @@ pub fn part1(input: &str) -> String {
             while let Some(p) = stack.pop() {
                 if !seen.insert(p) {
                     continue;
-                } else if g.at(p) == b'9' {
+                } else if g[p] == b'9' {
                     sum += 1;
                     continue;
                 }
                 g.adj(p).for_each(|(adj, d)| {
-                    if d == g.at(p) + 1 {
+                    if d == g[p] + 1 {
                         stack.push(adj);
                     }
                 });
@@ -41,12 +41,12 @@ pub fn part2(input: &str) -> String {
             let mut stack = vec![p];
             let mut sum = 0;
             while let Some(p) = stack.pop() {
-                if g.at(p) == b'9' {
+                if g[p] == b'9' {
                     sum += 1;
                     continue;
                 }
                 g.adj(p).for_each(|(adj, d)| {
-                    if d == g.at(p) + 1 {
+                    if d == g[p] + 1 {
                         stack.push(adj);
                     }
                 });

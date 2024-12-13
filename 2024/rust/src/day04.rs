@@ -6,7 +6,7 @@ fn stamps(g: &utils::Grid, stamp: Vec<utils::Point>) -> Vec<String> {
             stamp
                 .iter()
                 .map(|&s| p.add(s))
-                .filter_map(|p| g.in_bounds(p).then(|| g.at(p) as char))
+                .filter_map(|p| g.in_bounds(p).then(|| g[p] as char))
                 .collect()
         })
         .collect()

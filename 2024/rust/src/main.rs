@@ -11,6 +11,7 @@ mod day08;
 mod day09;
 mod day10;
 mod day11;
+mod day12;
 mod utils;
 
 fn main() {
@@ -28,6 +29,7 @@ fn main() {
         9 => (day09::part1(&input), day09::part2(&input)),
         10 => (day10::part1(&input), day10::part2(&input)),
         11 => (day11::part1(&input), day11::part2(&input)),
+        12 => (day12::part1(&input), day12::part2(&input)),
         _ => unimplemented!(),
     };
     println!("{}\n{}", part1, part2);

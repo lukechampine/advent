@@ -20,7 +20,7 @@ fn visit(g: &utils::Grid) -> HashSet<utils::Point> {
         let n = p.add(dir);
         if !g.in_bounds(n) {
             return seen;
-        } else if g.at(n) == b'#' {
+        } else if g[n] == b'#' {
             dir = turn_right(dir);
         } else {
             p = n;
@@ -42,7 +42,7 @@ fn has_cycle(g: &utils::Grid, c: utils::Point) -> bool {
         let n = p.add(dir);
         if !g.in_bounds(n) {
             return false;
-        } else if g.at(n) == b'#' || n == c {
+        } else if g[n] == b'#' || n == c {
             if !seen.insert((p, dir)) {
                 return true;
             }
