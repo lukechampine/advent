@@ -4,7 +4,7 @@ use std::{
 };
 
 pub fn ints(s: &str) -> impl Iterator<Item = i64> + '_ {
-    s.split(|c: char| !c.is_ascii_digit())
+    s.split(|c: char| !c.is_ascii_digit() && c != '-')
         .filter_map(|s| s.parse().ok())
 }
 
