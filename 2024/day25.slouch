@@ -1,0 +1,2 @@
+=fits map transpose |< zipWith (+) | all (count "#" < 8)
+groups | cleave (head | all (== "#")) | combos | count fits
