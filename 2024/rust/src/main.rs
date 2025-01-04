@@ -14,6 +14,12 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day17;
+mod day18;
+mod day19;
+mod day20;
+mod day22;
+mod day25;
 mod utils;
 
 fn main() {
@@ -34,6 +40,12 @@ fn main() {
         12 => (day12::part1(&input), day12::part2(&input)),
         13 => (day13::part1(&input), day13::part2(&input)),
         14 => (day14::part1(&input), day14::part2(&input)),
+        17 => (day17::part1(&input), day17::part2(&input)),
+        18 => (day18::part1(&input), day18::part2(&input)),
+        19 => (day19::part1(&input), day19::part2(&input)),
+        20 => (day20::part1(&input), day20::part2(&input)),
+        22 => (day22::part1(&input), day22::part2(&input)),
+        25 => (day25::part1(&input), day25::part2(&input)),
         _ => unimplemented!(),
     };
     println!("{}\n{}", part1, part2);

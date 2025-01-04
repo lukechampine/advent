@@ -8,16 +8,6 @@ import (
 
 var input = utils.Input(2024, 17)
 
-func runFast(a, b, c int) (out []int) {
-loop:
-	out = append(out, (a^(a>>((a%8)^1))^4)%8)
-	a /= 8
-	if a != 0 {
-		goto loop
-	}
-	return
-}
-
 func run(a, b, c int, prog []int) (out []int) {
 	combo := func(arg int) int {
 		switch arg {

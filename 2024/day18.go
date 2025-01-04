@@ -45,5 +45,5 @@ func main() {
 	n := sort.Search(len(bytes), func(n int) bool {
 		return path(bytes[:n]) == 999999
 	})
-	utils.Print(bytes[n-1].X, ",", bytes[n-1].Y, "\n", n)
+	utils.Print(bytes[n-1].X, ",", bytes[n-1].Y, "\n")
 }

@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use std::{
     collections::{HashSet, VecDeque},
     ops::{Index, IndexMut},
@@ -6,6 +7,12 @@ use std::{
 pub fn ints(s: &str) -> impl Iterator<Item = i64> + '_ {
     s.split(|c: char| !c.is_ascii_digit() && c != '-')
         .filter_map(|s| s.parse().ok())
+}
+
+pub fn pairs<T: Clone, U: Clone>(a: &Vec<T>, b: &Vec<U>) -> Vec<(T, U)> {
+    a.iter()
+        .flat_map(|x| b.iter().map(|y| (x.clone(), y.clone())))
+        .collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -42,6 +49,11 @@ impl Point {
         }
     }
 
+    pub fn dist(self, p: Point) -> isize {
+        let rel = self.sub(p);
+        rel.x.abs() + rel.y.abs()
+    }
+
     pub fn adj(p: Point) -> impl Iterator<Item = Point> {
         [(0, 1), (1, 0), (0, -1), (-1, 0)]
             .iter()
@@ -56,6 +68,14 @@ pub struct Grid {
 }
 
 impl Grid {
+    pub fn new(width: usize, height: usize, init: u8) -> Self {
+        Grid {
+            data: vec![init; width * height],
+            width,
+            height,
+        }
+    }
+
     pub fn from_string(s: &str) -> Self {
         let lines: Vec<&str> = s.lines().collect();
         let height = lines.len();
@@ -83,27 +103,40 @@ impl Grid {
     pub fn adj(&self, p: Point) -> impl Iterator<Item = (Point, u8)> + '_ {
         Point::adj(p).filter_map(|p| self.in_bounds(p).then(|| (p, self[p])))
     }
+
+    pub fn locate(&self, c: u8) -> Option<Point> {
+        self.iter().find(|&(_, b)| b == c).map(|(p, _)| p)
+    }
+
+    #[allow(dead_code)]
+    pub fn render(&self) -> String {
+        self.data
+            .chunks(self.width)
+            .map(|line| String::from_utf8_lossy(line))
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
 }
 
 impl Index<Point> for Grid {
     type Output = u8;
 
-    fn index(&self, point: Point) -> &Self::Output {
-        &self.data[point.y as usize * self.width + point.x as usize]
+    fn index(&self, p: Point) -> &Self::Output {
+        &self.data[p.y as usize * self.width + p.x as usize]
     }
 }
 
 impl IndexMut<Point> for Grid {
-    fn index_mut(&mut self, point: Point) -> &mut Self::Output {
-        &mut self.data[point.y as usize * self.width + point.x as usize]
+    fn index_mut(&mut self, p: Point) -> &mut Self::Output {
+        &mut self.data[p.y as usize * self.width + p.x as usize]
     }
 }
 
-pub fn flood(
-    start: Point,
-    mut is_open: impl FnMut(Point) -> bool,
-    mut next: impl FnMut(Point) -> Vec<Point>,
-) -> impl Iterator<Item = Point> {
+pub fn flood<T: Eq + Hash + Copy>(
+    start: T,
+    mut is_open: impl FnMut(T) -> bool,
+    mut next: impl FnMut(T) -> Vec<T>,
+) -> impl Iterator<Item = T> {
     let mut seen = HashSet::from([start]);
     let mut queue = VecDeque::new();
     queue.push_back(start);

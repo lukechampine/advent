@@ -8,10 +8,6 @@ struct Robot {
     vel: utils::Point,
 }
 
-fn mod_like_go(a: isize, b: isize) -> isize {
-    ((a % b) + b) % b
-}
-
 impl Robot {
     fn from_string(s: &str) -> Self {
         let ints = utils::ints(s).collect::<Vec<_>>();
@@ -23,8 +19,8 @@ impl Robot {
 
     fn update(&mut self) {
         self.pos = self.pos.add(self.vel);
-        self.pos.x = mod_like_go(self.pos.x + MAX_X, MAX_X);
-        self.pos.y = mod_like_go(self.pos.y + MAX_Y, MAX_Y);
+        self.pos.x = (self.pos.x + MAX_X) % MAX_X;
+        self.pos.y = (self.pos.y + MAX_Y) % MAX_Y;
     }
 }
 
