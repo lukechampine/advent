@@ -1,0 +1,2 @@
+=sizes input | split "\n\n" | take --1 | map (count "#")
+groups | last | count (ints | cleave 2 |< { product x > sum (zipWith (*) sizes y) })

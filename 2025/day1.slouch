@@ -1,0 +1,6 @@
+=input tr ["R":"+", "L":"-"] | ints
+=eumod { (x%y + y) % y }
+=crosses { abs y / 100 + int (x != 0 and (x + y%100 |: <= 0 or > 99)) }
+=path scan { [eumod (x.0 + y) 100, x.1 + crosses x.0 y] } [50, 0]
+path | countWith (.0) 0
+path | last | .1

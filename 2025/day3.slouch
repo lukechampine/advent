@@ -1,0 +1,5 @@
+=input lines | map digits
+sumWith (choose 2 | map fromDigits | max)
+=next { [append y.z x, drop (z+1) y] }
+=best12 iterate -<{ next x y (take (len x - 11) y | maxIndex) } | .11 |< { append (max y) x }
+map [[], _] | sumWith (best12 | fromDigits)

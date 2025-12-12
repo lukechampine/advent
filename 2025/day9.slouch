@@ -1,0 +1,6 @@
+=tiles input | ints | partition 2
+=rects tiles | choose 2
+=area -<{ (abs (x.0 - y.0) + 1) * (abs (x.1 - y.1) + 1) }
+rects | maxWith area
+=mids tiles | { append (head x) x } | window 2 | map -<{ [x.0+(y.0-x.0)/2, x.1+(y.1-x.1)/2] }
+rects | filter { all (not (within x)) mids } | maxWith area

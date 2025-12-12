@@ -604,12 +604,9 @@ type Rect struct {
 	Min, Max Pos
 }
 
-func (r Rect) Width() int  { return r.Max.Rel(r.Min).X }
-func (r Rect) Height() int { return r.Max.Rel(r.Min).Y }
-func (r Rect) Area() int {
-	p := r.Max.Rel(r.Min)
-	return (p.X + 1) * (p.Y + 1)
-}
+func (r Rect) Width() int  { return Abs(r.Max.Rel(r.Min).X) }
+func (r Rect) Height() int { return Abs(r.Max.Rel(r.Min).Y) }
+func (r Rect) Area() int   { return (r.Width() + 1) * (r.Height() + 1) }
 
 func (r Rect) Corners() []Pos {
 	return []Pos{

@@ -1,0 +1,4 @@
+=apply { (["+": sum, "*": product].y) (map int x) }
+lines | map words | transpose | sumWith (cleave --1 |< apply)
+=nums input | lines | take --1 | transpose | map (delete " ") | split ""
+lines | last | delete " " | zipWith apply nums | sum

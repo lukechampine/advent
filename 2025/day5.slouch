@@ -1,0 +1,6 @@
+=ranges input | groups | .0 | map (split "-" | map int)
+=ingredients input | groups | .1 | map int
+=contains { y.0 <= x and x <= y.1 }
+ingredients | count { any (contains x) ranges }
+
+stabilize mergeRanges ranges | sumWith -<{ y - x }
